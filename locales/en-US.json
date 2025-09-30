@@ -1,0 +1,157 @@
+{
+  "language": {
+    "label": "Language",
+    "options": {
+      "en-US": "English",
+      "zh-CN": "中文"
+    }
+  },
+  "app": {
+    "brand": "MediaEnhance Pro",
+    "user": {
+      "account": "User Account",
+      "plan": "Free Plan"
+    }
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "videoEnhancer": "Video/Image Enhancer",
+    "watermarkRemover": "Watermark Remover",
+    "styleTransfer": "Style Transfer",
+    "audioEnhancement": "Audio Enhancement",
+    "projects": "My Projects",
+    "settings": "Settings"
+  },
+  "videoEnhancer": {
+    "header": {
+      "title": "Video & Image Enhancer",
+      "subtitle": "Transform your low-quality videos and images into stunning high-resolution masterpieces using advanced AI technology."
+    },
+    "upload": {
+      "title": "Upload Media",
+      "drop": "Drop your files here",
+      "browse": "or click to browse",
+      "button": "Choose Files",
+      "supported": "Supported: .mp4, .mov, .m4v, .3gp, .avi, .jpg, .jpeg, .png (Max 8 files)"
+    },
+    "samples": {
+      "title": "Quick Samples",
+      "portrait": "Portrait Sample",
+      "nature": "Nature Sample",
+      "cityscape": "Cityscape Sample",
+      "food": "Food Sample"
+    },
+    "settings": {
+      "title": "Enhancement Settings",
+      "resolution": "Output Resolution",
+      "hd": "HD",
+      "hdSubtitle": "1920×1080",
+      "fourK": "4K",
+      "fourKSubtitle": "3840×2160"
+    },
+    "actions": {
+      "apply": "Apply Enhancement",
+      "reprocess": "Reprocess Video",
+      "download": "Download Enhanced Video"
+    },
+    "processing": {
+      "inProgress": "Processing your video...",
+      "details": "Enhancing quality • Upscaling resolution • Optimizing details",
+      "completeTitle": "Enhancement Complete!",
+      "completeSubtitle": "Your file is ready for download"
+    },
+    "comparison": {
+      "title": "Video Comparison",
+      "original": "Original",
+      "enhanced": "Enhanced",
+      "play": "Play",
+      "pause": "Pause",
+      "restart": "Restart",
+      "muted": "Muted",
+      "sound": "Sound",
+      "placeholderTitle": "To be uploaded",
+      "placeholderHint": "Upload a file to begin"
+    },
+    "status": {
+      "toBeUploaded": "To be uploaded",
+      "uploadHint": "Upload a file first",
+      "toBeProcessed": "To be processed",
+      "processHint": "Click Apply to begin",
+      "settingsChanged": "Settings changed",
+      "settingsHint": "Click Reprocess to apply new settings"
+    },
+    "resolution": {
+      "hdLabel": "HD 1920×1080px",
+      "fourKLabel": "4K 3840×2160px"
+    },
+    "messages": {
+      "uploadLimit": "Maximum 8 files allowed at once",
+      "uploadRequired": "Please upload a file first",
+      "downloadStarted": "Download started"
+    }
+  },
+  "watermark": {
+    "header": {
+      "title": "Watermark & Text Remover",
+      "subtitle": "Remove unwanted watermarks, logos, text, and objects from your images and videos using advanced AI-powered content-aware fill technology."
+    },
+    "upload": {
+      "title": "Upload Media",
+      "drop": "Drop your files here",
+      "browse": "or click to browse",
+      "button": "Choose Files",
+      "supported": "Supported: .mp4, .mov, .m4v, .3gp, .avi, .jpg, .jpeg, .png (Max 100MB)"
+    },
+    "samples": {
+      "title": "Quick Samples",
+      "watermark": "Watermark Sample",
+      "logo": "Logo Sample",
+      "text": "Text Sample",
+      "object": "Object Sample"
+    },
+    "settings": {
+      "title": "Removal Mode",
+      "modes": {
+        "smart": "Smart Remove",
+        "watermark": "Remove Watermark",
+        "subtitle": "Remove Subtitle"
+      }
+    },
+    "actions": {
+      "remove": "Remove Watermark",
+      "reprocess": "Reprocess Media",
+      "download": "Download Clean Media"
+    },
+    "processing": {
+      "inProgress": "Processing your media...",
+      "details": "Detecting watermarks • Analyzing content • Applying smart fill",
+      "completeTitle": "Watermark Removed Successfully!",
+      "completeSubtitle": "Your clean media is ready for download"
+    },
+    "comparison": {
+      "title": "Result Comparison",
+      "original": "Original",
+      "cleaned": "Cleaned",
+      "placeholderTitle": "To be uploaded",
+      "placeholderHint": "Upload a file to begin"
+    },
+    "status": {
+      "withWatermark": "With Watermark",
+      "removed": "Watermark Removed",
+      "subtitleRemoved": "Subtitle Removed",
+      "toBeProcessed": "To be processed",
+      "ready": "Ready to process",
+      "modeChanged": "Mode changed",
+      "processed": "Processed",
+      "uploadHint": "Upload a file first",
+      "processHint": "Click Remove Watermark to begin",
+      "reprocessHint": "Click Reprocess to apply new mode"
+    },
+    "messages": {
+      "fileTooLarge": "File size exceeds 100MB limit",
+      "uploadRequired": "Please upload a file first",
+      "success": "Watermark removed successfully!",
+      "download": "Downloading clean media..."
+    }
+  }
+}
