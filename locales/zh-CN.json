@@ -1,0 +1,157 @@
+{
+  "language": {
+    "label": "语言",
+    "options": {
+      "en-US": "English",
+      "zh-CN": "中文"
+    }
+  },
+  "app": {
+    "brand": "MediaEnhance Pro",
+    "user": {
+      "account": "用户账号",
+      "plan": "免费版"
+    }
+  },
+  "menu": {
+    "dashboard": "数据概览",
+    "videoEnhancer": "视频/图像增强",
+    "watermarkRemover": "水印去除",
+    "styleTransfer": "风格迁移",
+    "audioEnhancement": "音频增强",
+    "projects": "我的项目",
+    "settings": "设置"
+  },
+  "videoEnhancer": {
+    "header": {
+      "title": "视频与图像增强",
+      "subtitle": "利用先进的人工智能技术，将低清晰度的视频和图片转化为高分辨率的惊艳作品。"
+    },
+    "upload": {
+      "title": "上传素材",
+      "drop": "将文件拖拽到此处",
+      "browse": "或点击浏览",
+      "button": "选择文件",
+      "supported": "支持格式：.mp4、.mov、.m4v、.3gp、.avi、.jpg、.jpeg、.png（最多 8 个文件）"
+    },
+    "samples": {
+      "title": "快速示例",
+      "portrait": "人像示例",
+      "nature": "自然示例",
+      "cityscape": "城市示例",
+      "food": "美食示例"
+    },
+    "settings": {
+      "title": "增强设置",
+      "resolution": "输出分辨率",
+      "hd": "高清",
+      "hdSubtitle": "1920×1080",
+      "fourK": "4K",
+      "fourKSubtitle": "3840×2160"
+    },
+    "actions": {
+      "apply": "开始增强",
+      "reprocess": "重新增强",
+      "download": "下载增强结果"
+    },
+    "processing": {
+      "inProgress": "正在处理中...",
+      "details": "质量增强 • 分辨率提升 • 细节优化",
+      "completeTitle": "增强完成！",
+      "completeSubtitle": "文件已准备好，可立即下载"
+    },
+    "comparison": {
+      "title": "效果对比",
+      "original": "原始素材",
+      "enhanced": "增强结果",
+      "play": "播放",
+      "pause": "暂停",
+      "restart": "重新开始",
+      "muted": "静音",
+      "sound": "声音",
+      "placeholderTitle": "等待上传",
+      "placeholderHint": "上传文件即可开始"
+    },
+    "status": {
+      "toBeUploaded": "等待上传",
+      "uploadHint": "请先上传文件",
+      "toBeProcessed": "准备处理",
+      "processHint": "点击开始增强",
+      "settingsChanged": "设置已更改",
+      "settingsHint": "点击重新增强以应用新设置"
+    },
+    "resolution": {
+      "hdLabel": "高清 1920×1080 像素",
+      "fourKLabel": "4K 3840×2160 像素"
+    },
+    "messages": {
+      "uploadLimit": "一次最多只能上传 8 个文件",
+      "uploadRequired": "请先上传文件",
+      "downloadStarted": "开始下载"
+    }
+  },
+  "watermark": {
+    "header": {
+      "title": "水印与文字去除",
+      "subtitle": "基于 AI 的内容感知填充技术，轻松移除图片或视频中的水印、标志、字幕和杂物。"
+    },
+    "upload": {
+      "title": "上传素材",
+      "drop": "将文件拖拽到此处",
+      "browse": "或点击浏览",
+      "button": "选择文件",
+      "supported": "支持格式：.mp4、.mov、.m4v、.3gp、.avi、.jpg、.jpeg、.png（最大 100MB）"
+    },
+    "samples": {
+      "title": "快速示例",
+      "watermark": "水印示例",
+      "logo": "标志示例",
+      "text": "文字示例",
+      "object": "物体示例"
+    },
+    "settings": {
+      "title": "去除模式",
+      "modes": {
+        "smart": "智能去除",
+        "watermark": "移除水印",
+        "subtitle": "移除字幕"
+      }
+    },
+    "actions": {
+      "remove": "开始去除",
+      "reprocess": "重新处理",
+      "download": "下载净化结果"
+    },
+    "processing": {
+      "inProgress": "正在处理中...",
+      "details": "检测水印 • 分析内容 • 智能填充",
+      "completeTitle": "水印去除成功！",
+      "completeSubtitle": "净化后的文件已准备就绪"
+    },
+    "comparison": {
+      "title": "结果对比",
+      "original": "原始素材",
+      "cleaned": "净化结果",
+      "placeholderTitle": "等待上传",
+      "placeholderHint": "上传文件即可开始"
+    },
+    "status": {
+      "withWatermark": "原始带水印",
+      "removed": "水印已去除",
+      "subtitleRemoved": "字幕已去除",
+      "toBeProcessed": "等待处理",
+      "ready": "准备处理",
+      "modeChanged": "模式已调整",
+      "processed": "处理完成",
+      "uploadHint": "请先上传文件",
+      "processHint": "点击开始去除",
+      "reprocessHint": "点击重新处理以应用新模式"
+    },
+    "messages": {
+      "fileTooLarge": "文件大小超过 100MB 限制",
+      "uploadRequired": "请先上传文件",
+      "success": "水印去除成功！",
+      "download": "正在下载净化后的文件..."
+    }
+  }
+}

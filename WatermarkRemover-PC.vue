@@ -2,17 +2,17 @@
   <div class="watermark-remover-page">
     <!-- 侧边栏 -->
     <aside class="sidebar">
-      <div class="logo">MediaEnhance Pro</div>
+      <div class="logo">{{ translate('app.brand') }}</div>
       <nav>
         <ul class="nav-menu">
-          <li 
+          <li
             v-for="(item, index) in menuItems"
             :key="index"
             :class="['nav-item', { active: item.active }]"
             @click="handleMenuClick(index)"
           >
             <span class="nav-icon">{{ item.icon }}</span>
-            <span>{{ item.label }}</span>
+            <span>{{ translate(item.labelKey) }}</span>
           </li>
         </ul>
       </nav>
@@ -20,8 +20,8 @@
         <div class="nav-item user-account">
           <span class="nav-icon">👤</span>
           <div class="user-details">
-            <div class="user-name">User Account</div>
-            <div class="user-plan">Free Plan</div>
+            <div class="user-name">{{ translate('app.user.account') }}</div>
+            <div class="user-plan">{{ translate('app.user.plan') }}</div>
           </div>
         </div>
       </div>
@@ -32,9 +32,19 @@
       <div class="content-wrapper">
         <!-- 标题区域 -->
         <div class="header">
-          <h1 class="header-title">Watermark & Text Remover</h1>
+          <div class="language-switcher">
+            <label :for="`${$options.name}-locale`" class="language-label">
+              {{ translate('language.label') }}
+            </label>
+            <select :id="`${$options.name}-locale`" v-model="locale" class="language-select">
+              <option v-for="code in availableLocales" :key="code" :value="code">
+                {{ translate(`language.options.${code}`) }}
+              </option>
+            </select>
+          </div>
+          <h1 class="header-title">{{ translate('watermark.header.title') }}</h1>
           <p class="header-subtitle">
-            Remove unwanted watermarks, logos, text, and objects from your images and videos using advanced AI-powered content-aware fill technology.
+            {{ translate('watermark.header.subtitle') }}
           </p>
         </div>
 
@@ -44,7 +54,7 @@
           <div class="workspace-left">
             <!-- 上传区域 -->
             <div class="upload-container">
-              <div class="section-title">Upload Media</div>
+              <div class="section-title">{{ translate('watermark.upload.title') }}</div>
               <div
                 :class="['upload-area', { 'has-file': hasFile, 'dragover': isDragover }]"
                 @drop.prevent="handleDrop"
@@ -53,19 +63,19 @@
                 @click="!hasFile && triggerFileInput()"
               >
                 <div v-if="uploadSuccess" class="upload-success-badge">✔</div>
-                
+
                 <!-- 上传内容 -->
                 <div v-if="!filePreview" class="upload-content">
                   <div class="upload-icon">⬆️</div>
-                  <div class="upload-title">Drop your files here</div>
-                  <div class="upload-subtitle">or click to browse</div>
+                  <div class="upload-title">{{ translate('watermark.upload.drop') }}</div>
+                  <div class="upload-subtitle">{{ translate('watermark.upload.browse') }}</div>
                   <el-button type="primary" class="upload-btn-small" @click.stop="triggerFileInput">
-                    Choose Files
+                    {{ translate('watermark.upload.button') }}
                   </el-button>
-                  <input 
+                  <input
                     ref="fileInput"
-                    type="file" 
-                    class="file-input" 
+                    type="file"
+                    class="file-input"
                     multiple 
                     accept=".mp4,.mov,.m4v,.3gp,.avi,.jpg,.jpeg,.png" 
                     @change="handleFileSelect"
@@ -95,20 +105,20 @@
                 </div>
               </div>
               <div class="supported-formats">
-                Supported: .mp4, .mov, .m4v, .3gp, .avi, .jpg, .jpeg, .png (Max 100MB)
+                {{ translate('watermark.upload.supported') }}
               </div>
             </div>
 
             <!-- 示例文件 -->
             <div class="samples-container">
-              <div class="section-title">Quick Samples</div>
+              <div class="section-title">{{ translate('watermark.samples.title') }}</div>
               <div class="sample-grid">
                 <div
                   v-for="sample in samples"
                   :key="sample.type"
                   class="sample-item"
                   @click="loadSample(sample.type)"
-                  :title="sample.title"
+                  :title="translate(sample.titleKey)"
                 >
                   <span class="sample-icon">{{ sample.icon }}</span>
                 </div>
@@ -120,7 +130,7 @@
           <div class="workspace-right">
             <!-- 移除模式设置 -->
             <div class="settings-container">
-              <div class="section-title">Removal Mode</div>
+              <div class="section-title">{{ translate('watermark.settings.title') }}</div>
               
               <!-- 移除模式选择 -->
               <div class="setting-group">
@@ -133,7 +143,7 @@
                   >
                     <div class="mode-content">
                       <span class="mode-icon">{{ mode.icon }}</span>
-                      <span class="mode-title">{{ mode.label }}</span>
+                      <span class="mode-title">{{ translate(mode.labelKey) }}</span>
                     </div>
                   </el-radio>
                 </el-radio-group>
@@ -151,7 +161,7 @@
                 :loading="processing"
               >
                 <span v-if="!processing" class="btn-icon">🧹</span>
-                <span>{{ buttonText }}</span>
+                <span>{{ translate(buttonTextKey) }}</span>
               </el-button>
               
               <el-button
@@ -161,14 +171,14 @@
                 @click="downloadResult"
               >
                 <span class="btn-icon">⬇️</span>
-                Download Clean Media
+                {{ translate('watermark.actions.download') }}
               </el-button>
 
               <!-- 处理进度 -->
               <div v-if="processing" class="process-info">
                 <div class="process-status">
                   <span class="status-icon">⏳</span>
-                  <span class="status-text">Processing your media...</span>
+                  <span class="status-text">{{ translate('watermark.processing.inProgress') }}</span>
                   <span class="status-percent">{{ processPercent }}%</span>
                 </div>
                 <el-progress
@@ -178,15 +188,15 @@
                   class="progress-bar"
                 />
                 <div class="process-details">
-                  <small>Detecting watermarks • Analyzing content • Applying smart fill</small>
+                  <small>{{ translate('watermark.processing.details') }}</small>
                 </div>
               </div>
 
               <!-- 完成状态 -->
               <div v-if="processingComplete && !processing" class="process-complete">
                 <span class="complete-icon">✅</span>
-                <div class="complete-text">Watermark Removed Successfully!</div>
-                <div class="complete-subtitle">Your clean media is ready for download</div>
+                <div class="complete-text">{{ translate('watermark.processing.completeTitle') }}</div>
+                <div class="complete-subtitle">{{ translate('watermark.processing.completeSubtitle') }}</div>
               </div>
             </div>
           </div>
@@ -195,15 +205,15 @@
         <!-- 结果对比区域 -->
         <div class="comparison-section">
           <div class="comparison-header">
-            <h2 class="comparison-title">Result Comparison</h2>
+            <h2 class="comparison-title">{{ translate('watermark.comparison.title') }}</h2>
           </div>
-          
+
           <div class="comparison-container">
             <!-- 原始图片/视频 -->
             <div class="comparison-item">
               <div class="comparison-label">
-                <span class="label-badge original">Original</span>
-                <span class="label-info">{{ originalInfo }}</span>
+                <span class="label-badge original">{{ translate('watermark.comparison.original') }}</span>
+                <span class="label-info">{{ translate(originalInfoKey) }}</span>
               </div>
               <div class="image-wrapper">
                 <img
@@ -222,8 +232,8 @@
                 <div v-if="!fileUploaded" class="upload-placeholder">
                   <div class="placeholder-info">
                     <span class="placeholder-icon">📂</span>
-                    <p>To be uploaded</p>
-                    <small>Upload a file to begin</small>
+                    <p>{{ translate('watermark.comparison.placeholderTitle') }}</p>
+                    <small>{{ translate('watermark.comparison.placeholderHint') }}</small>
                   </div>
                 </div>
               </div>
@@ -237,8 +247,8 @@
             <!-- 清理后的图片/视频 -->
             <div class="comparison-item">
               <div class="comparison-label">
-                <span class="label-badge cleaned">Cleaned</span>
-                <span class="label-info">{{ cleanedInfo }}</span>
+                <span class="label-badge cleaned">{{ translate('watermark.comparison.cleaned') }}</span>
+                <span class="label-info">{{ translate(cleanedInfoKey) }}</span>
               </div>
               <div class="image-wrapper">
                 <img
@@ -257,8 +267,8 @@
                 <div v-if="!processingComplete || !fileUploaded" class="process-placeholder">
                   <div class="placeholder-info">
                     <span class="placeholder-icon">{{ placeholderIcon }}</span>
-                    <p>{{ placeholderText }}</p>
-                    <small>{{ placeholderHint }}</small>
+                    <p>{{ translate(placeholderTextKey) }}</p>
+                    <small>{{ translate(placeholderHintKey) }}</small>
                   </div>
                 </div>
               </div>
@@ -271,34 +281,39 @@
 </template>
 
 <script>
+import { supportedLocales, translate as translateText } from './i18n'
+
 export default {
   name: 'WatermarkRemover',
   data() {
     return {
+      availableLocales: supportedLocales,
+      locale: 'en-US',
+
       // Menu items
       menuItems: [
-        { icon: '📊', label: 'Dashboard', active: false },
-        { icon: '✨', label: 'Video/Image Enhancer', active: false },
-        { icon: '🧹', label: 'Watermark Remover', active: true },
-        { icon: '🎨', label: 'Style Transfer', active: false },
-        { icon: '🔊', label: 'Audio Enhancement', active: false },
-        { icon: '📁', label: 'My Projects', active: false },
-        { icon: '⚙️', label: 'Settings', active: false }
+        { icon: '📊', labelKey: 'menu.dashboard', active: false },
+        { icon: '✨', labelKey: 'menu.videoEnhancer', active: false },
+        { icon: '🧹', labelKey: 'menu.watermarkRemover', active: true },
+        { icon: '🎨', labelKey: 'menu.styleTransfer', active: false },
+        { icon: '🔊', labelKey: 'menu.audioEnhancement', active: false },
+        { icon: '📁', labelKey: 'menu.projects', active: false },
+        { icon: '⚙️', labelKey: 'menu.settings', active: false }
       ],
-      
+
       // Sample files
       samples: [
-        { type: 'watermark', icon: '💧', title: 'Watermark Sample' },
-        { type: 'logo', icon: '🏷️', title: 'Logo Sample' },
-        { type: 'text', icon: '📝', title: 'Text Sample' },
-        { type: 'object', icon: '🗑️', title: 'Object Sample' }
+        { type: 'watermark', icon: '💧', titleKey: 'watermark.samples.watermark' },
+        { type: 'logo', icon: '🏷️', titleKey: 'watermark.samples.logo' },
+        { type: 'text', icon: '📝', titleKey: 'watermark.samples.text' },
+        { type: 'object', icon: '🗑️', titleKey: 'watermark.samples.object' }
       ],
-      
+
       // Removal modes
       removalModes: [
-        { value: 'smart', label: 'Smart Remove', icon: '✨' },
-        { value: 'watermark', label: 'Remove Watermark', icon: '💧' },
-        { value: 'subtitle', label: 'Remove Subtitle', icon: '📝' }
+        { value: 'smart', labelKey: 'watermark.settings.modes.smart', icon: '✨' },
+        { value: 'watermark', labelKey: 'watermark.settings.modes.watermark', icon: '💧' },
+        { value: 'subtitle', labelKey: 'watermark.settings.modes.subtitle', icon: '📝' }
       ],
       
       // Upload state
@@ -317,7 +332,7 @@ export default {
       processing: false,
       processingComplete: false,
       processPercent: 0,
-      buttonText: 'Remove Watermark',
+      buttonTextKey: 'watermark.actions.remove',
       
       // Display state
       showOriginalVideo: false,
@@ -330,17 +345,21 @@ export default {
       cleanedImageSrc: '',
       
       // Info text
-      originalInfo: 'With Watermark',
-      cleanedInfo: 'Watermark Removed',
-      
+      originalInfoKey: 'watermark.status.withWatermark',
+      cleanedInfoKey: 'watermark.status.removed',
+
       // Placeholder state
       placeholderIcon: '⏳',
-      placeholderText: 'To be processed',
-      placeholderHint: 'Upload a file first'
+      placeholderTextKey: 'watermark.status.toBeProcessed',
+      placeholderHintKey: 'watermark.status.uploadHint'
     }
   },
-  
+
   methods: {
+    translate(key) {
+      return translateText(this.locale, key)
+    },
+
     // Handle menu click
     handleMenuClick(index) {
       this.menuItems.forEach((item, i) => {
@@ -384,7 +403,7 @@ export default {
       if (files.length > 0) {
         // Check file size
         if (files[0].size > 100 * 1024 * 1024) {
-          this.$message.error('File size exceeds 100MB limit')
+          this.$message.error(this.translate('watermark.messages.fileTooLarge'))
           return
         }
         
@@ -420,12 +439,12 @@ export default {
     showComparisonWithFile() {
       // Update placeholder
       this.placeholderIcon = '⏳'
-      this.placeholderText = 'Ready to process'
-      this.placeholderHint = 'Click Remove Watermark to begin'
-      
+      this.placeholderTextKey = 'watermark.status.ready'
+      this.placeholderHintKey = 'watermark.status.processHint'
+
       // Update info text
-      this.originalInfo = 'With Watermark'
-      this.cleanedInfo = 'Ready to process'
+      this.originalInfoKey = 'watermark.status.withWatermark'
+      this.cleanedInfoKey = 'watermark.status.ready'
       
       // Setup original content
       if (this.fileType === 'video') {
@@ -470,19 +489,19 @@ export default {
       this.showOriginalImage = false
       this.showCleanedVideo = false
       this.showCleanedImage = false
-      this.originalInfo = 'With Watermark'
-      this.cleanedInfo = 'Watermark Removed'
+      this.originalInfoKey = 'watermark.status.withWatermark'
+      this.cleanedInfoKey = 'watermark.status.removed'
       this.placeholderIcon = '⏳'
-      this.placeholderText = 'To be processed'
-      this.placeholderHint = 'Upload a file first'
+      this.placeholderTextKey = 'watermark.status.toBeProcessed'
+      this.placeholderHintKey = 'watermark.status.uploadHint'
     },
-    
+
     // Reset processing state
     resetProcessingState() {
       this.processing = false
       this.processingComplete = false
       this.processPercent = 0
-      this.buttonText = 'Remove Watermark'
+      this.buttonTextKey = 'watermark.actions.remove'
     },
     
     // Load sample
@@ -582,17 +601,17 @@ export default {
     
     // Reset to reprocess state
     resetToReprocess() {
-      this.buttonText = 'Reprocess Media'
+      this.buttonTextKey = 'watermark.actions.reprocess'
       this.processingComplete = false
       this.placeholderIcon = '🔄'
-      this.placeholderText = 'Mode changed'
-      this.placeholderHint = 'Click Reprocess to apply new mode'
+      this.placeholderTextKey = 'watermark.status.modeChanged'
+      this.placeholderHintKey = 'watermark.status.reprocessHint'
     },
     
     // Start processing
     startProcessing() {
       if (!this.hasFile) {
-        this.$message.warning('Please upload a file first')
+        this.$message.warning(this.translate('watermark.messages.uploadRequired'))
         return
       }
       
@@ -610,7 +629,7 @@ export default {
             this.processing = false
             this.processingComplete = true
             this.showCleanedResult()
-            this.$message.success('Watermark removed successfully!')
+            this.$message.success(this.translate('watermark.messages.success'))
           }, 500)
         }
       }, 200)
@@ -619,12 +638,12 @@ export default {
     // Show cleaned result
     showCleanedResult() {
       const modeText = {
-        'smart': 'Smart Remove',
-        'watermark': 'Watermark Removed',
-        'subtitle': 'Subtitle Removed'
+        smart: 'watermark.settings.modes.smart',
+        watermark: 'watermark.status.removed',
+        subtitle: 'watermark.status.subtitleRemoved'
       }
-      this.cleanedInfo = modeText[this.removalMode] || 'Processed'
-      
+      this.cleanedInfoKey = modeText[this.removalMode] || 'watermark.status.processed'
+
       if (this.fileType === 'video') {
         this.setupCleanedVideo()
       } else {
@@ -648,7 +667,7 @@ export default {
     
     // Download result
     downloadResult() {
-      this.$message.info('Downloading clean media...')
+      this.$message.info(this.translate('watermark.messages.download'))
       
       // Create download link
       const link = document.createElement('a')

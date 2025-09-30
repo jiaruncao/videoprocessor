@@ -2,7 +2,7 @@
   <div class="video-enhancer-page">
     <!-- 侧边栏 -->
     <aside class="sidebar">
-      <div class="logo">MediaEnhance Pro</div>
+      <div class="logo">{{ translate('app.brand') }}</div>
       <nav class="nav-menu">
         <div
           v-for="(item, index) in menuItems"
@@ -11,15 +11,15 @@
           @click="handleMenuClick(index)"
         >
           <span class="nav-icon">{{ item.icon }}</span>
-          <span>{{ item.label }}</span>
+          <span>{{ translate(item.labelKey) }}</span>
         </div>
       </nav>
       <div class="user-info">
         <div class="nav-item user-account">
           <span class="nav-icon">👤</span>
           <div class="user-details">
-            <div class="user-name">User Account</div>
-            <div class="user-plan">Free Plan</div>
+            <div class="user-name">{{ translate('app.user.account') }}</div>
+            <div class="user-plan">{{ translate('app.user.plan') }}</div>
           </div>
         </div>
       </div>
@@ -30,9 +30,19 @@
       <div class="content-wrapper">
         <!-- 标题区域 -->
         <div class="header">
-          <h1 class="header-title">Video & Image Enhancer</h1>
+          <div class="language-switcher">
+            <label :for="`${$options.name}-locale`" class="language-label">
+              {{ translate('language.label') }}
+            </label>
+            <select :id="`${$options.name}-locale`" v-model="locale" class="language-select">
+              <option v-for="code in availableLocales" :key="code" :value="code">
+                {{ translate(`language.options.${code}`) }}
+              </option>
+            </select>
+          </div>
+          <h1 class="header-title">{{ translate('videoEnhancer.header.title') }}</h1>
           <p class="header-subtitle">
-            Transform your low-quality videos and images into stunning high-resolution masterpieces using advanced AI technology.
+            {{ translate('videoEnhancer.header.subtitle') }}
           </p>
         </div>
 
@@ -42,7 +52,7 @@
           <div class="workspace-left">
             <!-- 上传区域 -->
             <div class="upload-container">
-              <h3 class="section-title">Upload Media</h3>
+              <h3 class="section-title">{{ translate('videoEnhancer.upload.title') }}</h3>
               <div
                 :class="['upload-area', { 'has-file': hasFile, 'dragover': isDragover }]"
                 @drop.prevent="handleDrop"
@@ -55,10 +65,10 @@
                 <!-- 上传内容 -->
                 <div v-if="!filePreview" class="upload-content">
                   <div class="upload-icon">⬆️</div>
-                  <div class="upload-title">Drop your files here</div>
-                  <div class="upload-subtitle">or click to browse</div>
+                  <div class="upload-title">{{ translate('videoEnhancer.upload.drop') }}</div>
+                  <div class="upload-subtitle">{{ translate('videoEnhancer.upload.browse') }}</div>
                   <el-button type="primary" size="small" class="upload-btn-small" @click.stop="triggerFileInput">
-                    Choose Files
+                    {{ translate('videoEnhancer.upload.button') }}
                   </el-button>
                   <input
                     ref="fileInput"
@@ -92,20 +102,20 @@
                 </div>
               </div>
               <div class="supported-formats">
-                Supported: .mp4, .mov, .m4v, .3gp, .avi, .jpg, .jpeg, .png (Max 8 files)
+                {{ translate('videoEnhancer.upload.supported') }}
               </div>
             </div>
 
             <!-- 示例文件 -->
             <div class="samples-container">
-              <h3 class="section-title">Quick Samples</h3>
+              <h3 class="section-title">{{ translate('videoEnhancer.samples.title') }}</h3>
               <div class="sample-grid">
                 <div
                   v-for="sample in samples"
                   :key="sample.type"
                   class="sample-item"
                   @click="loadSample(sample.type)"
-                  :title="sample.title"
+                  :title="translate(sample.titleKey)"
                 >
                   <span class="sample-icon">{{ sample.icon }}</span>
                 </div>
@@ -117,26 +127,26 @@
           <div class="workspace-right">
             <!-- 增强设置 -->
             <div class="settings-container">
-              <h3 class="section-title">Enhancement Settings</h3>
-              
+              <h3 class="section-title">{{ translate('videoEnhancer.settings.title') }}</h3>
+
               <!-- 分辨率选择 -->
               <div class="setting-group">
-                <div class="setting-label">Output Resolution</div>
+                <div class="setting-label">{{ translate('videoEnhancer.settings.resolution') }}</div>
                 <el-radio-group v-model="resolution" @change="handleSettingChange">
                   <div class="resolution-group">
                     <label class="radio-option">
                       <el-radio label="hd">
                         <div class="radio-content">
-                          <div class="radio-title">HD</div>
-                          <div class="radio-subtitle">1920×1080</div>
+                          <div class="radio-title">{{ translate('videoEnhancer.settings.hd') }}</div>
+                          <div class="radio-subtitle">{{ translate('videoEnhancer.settings.hdSubtitle') }}</div>
                         </div>
                       </el-radio>
                     </label>
                     <label class="radio-option">
                       <el-radio label="4k">
                         <div class="radio-content">
-                          <div class="radio-title">4K</div>
-                          <div class="radio-subtitle">3840×2160</div>
+                          <div class="radio-title">{{ translate('videoEnhancer.settings.fourK') }}</div>
+                          <div class="radio-subtitle">{{ translate('videoEnhancer.settings.fourKSubtitle') }}</div>
                         </div>
                       </el-radio>
                     </label>
@@ -153,12 +163,12 @@
                 class="action-btn btn-process"
                 :disabled="processing || !fileUploaded"
                 @click="startProcessing"
-                :loading="processing"
-              >
-                <span v-if="!processing" class="btn-icon">🚀</span>
-                {{ buttonText }}
+              :loading="processing"
+            >
+              <span v-if="!processing" class="btn-icon">🚀</span>
+                {{ translate(buttonTextKey) }}
               </el-button>
-              
+
               <el-button
                 v-else
                 type="success"
@@ -166,14 +176,14 @@
                 @click="downloadResult"
               >
                 <span class="btn-icon">⬇️</span>
-                Download Enhanced Video
+                {{ translate('videoEnhancer.actions.download') }}
               </el-button>
 
               <!-- 处理进度 -->
               <div v-if="processing" class="process-info">
                 <div class="process-status">
                   <span class="status-icon">⏳</span>
-                  <span class="status-text">Processing your video...</span>
+                  <span class="status-text">{{ translate('videoEnhancer.processing.inProgress') }}</span>
                   <span class="status-percent">{{ processPercent }}%</span>
                 </div>
                 <el-progress
@@ -183,15 +193,15 @@
                   color="#6366f1"
                 />
                 <div class="process-details">
-                  <small>Enhancing quality • Upscaling resolution • Optimizing details</small>
+                  <small>{{ translate('videoEnhancer.processing.details') }}</small>
                 </div>
               </div>
 
               <!-- 完成状态 -->
               <div v-if="processingComplete && !processing" class="process-complete">
                 <div class="complete-icon">✅</div>
-                <div class="complete-text">Enhancement Complete!</div>
-                <div class="complete-subtitle">Your file is ready for download</div>
+                <div class="complete-text">{{ translate('videoEnhancer.processing.completeTitle') }}</div>
+                <div class="complete-subtitle">{{ translate('videoEnhancer.processing.completeSubtitle') }}</div>
               </div>
             </div>
           </div>
@@ -200,7 +210,7 @@
         <!-- 视频对比区域 -->
         <div class="comparison-section">
           <div class="comparison-header">
-            <h2 class="comparison-title">Video Comparison</h2>
+            <h2 class="comparison-title">{{ translate('videoEnhancer.comparison.title') }}</h2>
             <div v-show="showVideoControls" class="comparison-controls">
               <el-button
                 class="control-btn"
@@ -209,7 +219,7 @@
                 round
               >
                 <span class="control-icon">{{ isPlaying ? '⏸️' : '▶️' }}</span>
-                {{ isPlaying ? 'Pause' : 'Play' }}
+                {{ translate(isPlaying ? 'videoEnhancer.comparison.pause' : 'videoEnhancer.comparison.play') }}
               </el-button>
               <el-button
                 class="control-btn"
@@ -218,7 +228,7 @@
                 round
               >
                 <span class="control-icon">🔄</span>
-                Restart
+                {{ translate('videoEnhancer.comparison.restart') }}
               </el-button>
               <el-button
                 class="control-btn"
@@ -227,7 +237,7 @@
                 round
               >
                 <span class="control-icon">{{ isMuted ? '🔇' : '🔊' }}</span>
-                {{ isMuted ? 'Muted' : 'Sound' }}
+                {{ translate(isMuted ? 'videoEnhancer.comparison.muted' : 'videoEnhancer.comparison.sound') }}
               </el-button>
               <el-slider
                 v-model="videoProgress"
@@ -242,7 +252,7 @@
             <!-- 原始视频/图片 -->
             <div class="comparison-item">
               <div class="comparison-label">
-                <span class="label-badge original">Original</span>
+                <span class="label-badge original">{{ translate('videoEnhancer.comparison.original') }}</span>
                 <span class="label-resolution">{{ originalResolution }}</span>
               </div>
               <div
@@ -269,8 +279,8 @@
                 <div v-if="!fileUploaded" class="upload-placeholder">
                   <div class="placeholder-info">
                     <span class="placeholder-icon">📁</span>
-                    <p class="placeholder-text">To be uploaded</p>
-                    <small class="placeholder-hint">Upload a file to begin</small>
+                    <p class="placeholder-text">{{ translate('videoEnhancer.comparison.placeholderTitle') }}</p>
+                    <small class="placeholder-hint">{{ translate('videoEnhancer.comparison.placeholderHint') }}</small>
                   </div>
                 </div>
               </div>
@@ -284,7 +294,7 @@
             <!-- 增强后的视频/图片 -->
             <div class="comparison-item">
               <div class="comparison-label">
-                <span class="label-badge enhanced">Enhanced</span>
+                <span class="label-badge enhanced">{{ translate('videoEnhancer.comparison.enhanced') }}</span>
                 <span class="label-resolution">{{ enhancedResolution }}</span>
               </div>
               <div
@@ -310,8 +320,8 @@
                 <div v-if="!processingComplete || !fileUploaded" class="enhancement-overlay">
                   <div class="enhancement-info">
                     <span class="check-icon">{{ enhancementIcon }}</span>
-                    <p class="enhancement-text">{{ enhancementText }}</p>
-                    <small class="enhancement-hint">{{ enhancementHint }}</small>
+                    <p class="enhancement-text">{{ translate(enhancementTextKey) }}</p>
+                    <small class="enhancement-hint">{{ translate(enhancementHintKey) }}</small>
                   </div>
                 </div>
               </div>
@@ -333,26 +343,30 @@
 </template>
 
 <script>
+import { supportedLocales, translate as translateText } from './i18n'
+
 export default {
   name: 'VideoEnhancer',
   data() {
     return {
+      availableLocales: supportedLocales,
+      locale: 'en-US',
       // 菜单项
       menuItems: [
-        { icon: '📊', label: 'Dashboard', active: false },
-        { icon: '✨', label: 'Video/Image Enhancer', active: true },
-        { icon: '🎨', label: 'Style Transfer', active: false },
-        { icon: '🔊', label: 'Audio Enhancement', active: false },
-        { icon: '📁', label: 'My Projects', active: false },
-        { icon: '⚙️', label: 'Settings', active: false }
+        { icon: '📊', labelKey: 'menu.dashboard', active: false },
+        { icon: '✨', labelKey: 'menu.videoEnhancer', active: true },
+        { icon: '🎨', labelKey: 'menu.styleTransfer', active: false },
+        { icon: '🔊', labelKey: 'menu.audioEnhancement', active: false },
+        { icon: '📁', labelKey: 'menu.projects', active: false },
+        { icon: '⚙️', labelKey: 'menu.settings', active: false }
       ],
-      
+
       // 示例文件
       samples: [
-        { type: 'portrait', icon: '👤', title: 'Portrait Sample' },
-        { type: 'nature', icon: '🌿', title: 'Nature Sample' },
-        { type: 'cityscape', icon: '🏙️', title: 'Cityscape Sample' },
-        { type: 'food', icon: '🍔', title: 'Food Sample' }
+        { type: 'portrait', icon: '👤', titleKey: 'videoEnhancer.samples.portrait' },
+        { type: 'nature', icon: '🌿', titleKey: 'videoEnhancer.samples.nature' },
+        { type: 'cityscape', icon: '🏙️', titleKey: 'videoEnhancer.samples.cityscape' },
+        { type: 'food', icon: '🍔', titleKey: 'videoEnhancer.samples.food' }
       ],
       
       // 上传状态
@@ -371,7 +385,7 @@ export default {
       processing: false,
       processingComplete: false,
       processPercent: 0,
-      buttonText: 'Apply Enhancement',
+      buttonTextKey: 'videoEnhancer.actions.apply',
       
       // 视频控制
       isPlaying: false,
@@ -397,8 +411,8 @@ export default {
       
       // 增强提示
       enhancementIcon: '📁',
-      enhancementText: 'To be uploaded',
-      enhancementHint: 'Upload a file first'
+      enhancementTextKey: 'videoEnhancer.status.toBeUploaded',
+      enhancementHintKey: 'videoEnhancer.status.uploadHint'
     }
   },
   
@@ -406,13 +420,23 @@ export default {
     // 组件挂载后的初始化
     this.initializeComponent()
   },
-  
+
   beforeDestroy() {
     // 清理资源
     this.cleanup()
   },
-  
+
+  watch: {
+    locale() {
+      this.updateResolutionDisplay()
+    }
+  },
+
   methods: {
+    translate(key) {
+      return translateText(this.locale, key)
+    },
+
     // 初始化组件
     initializeComponent() {
       console.log('Video Enhancer component initialized')
@@ -471,7 +495,7 @@ export default {
     // 处理文件
     handleFiles(files) {
       if (files.length > 8) {
-        this.$message.warning('Maximum 8 files allowed at once')
+        this.$message.warning(this.translate('videoEnhancer.messages.uploadLimit'))
         return
       }
       
@@ -506,9 +530,9 @@ export default {
     showComparisonWithFile() {
       // 更新增强提示
       this.enhancementIcon = '⏳'
-      this.enhancementText = 'To be processed'
-      this.enhancementHint = 'Click Apply to begin'
-      
+      this.enhancementTextKey = 'videoEnhancer.status.toBeProcessed'
+      this.enhancementHintKey = 'videoEnhancer.status.processHint'
+
       // 更新分辨率显示
       this.updateResolutionDisplay()
       
@@ -583,8 +607,8 @@ export default {
       this.originalResolution = '-'
       this.enhancedResolution = '-'
       this.enhancementIcon = '📁'
-      this.enhancementText = 'To be uploaded'
-      this.enhancementHint = 'Upload a file first'
+      this.enhancementTextKey = 'videoEnhancer.status.toBeUploaded'
+      this.enhancementHintKey = 'videoEnhancer.status.uploadHint'
       
       // 清理视频资源
       if (this.originalVideoSrc && this.originalVideoSrc.startsWith('blob:')) {
@@ -605,7 +629,7 @@ export default {
       this.processing = false
       this.processingComplete = false
       this.processPercent = 0
-      this.buttonText = 'Apply Enhancement'
+      this.buttonTextKey = 'videoEnhancer.actions.apply'
     },
     
     // 加载示例
@@ -662,23 +686,27 @@ export default {
     // 更新分辨率显示
     updateResolutionDisplay() {
       if (this.fileUploaded) {
-        this.enhancedResolution = this.resolution === '4k' ? '4K 3840×2160px' : 'HD 1920×1080px'
+        this.enhancedResolution = this.translate(
+          this.resolution === '4k'
+            ? 'videoEnhancer.resolution.fourKLabel'
+            : 'videoEnhancer.resolution.hdLabel'
+        )
       }
     },
-    
+
     // 重置为重新处理状态
     resetToReprocess() {
-      this.buttonText = 'Reprocess Video'
+      this.buttonTextKey = 'videoEnhancer.actions.reprocess'
       this.processingComplete = false
       this.enhancementIcon = '🔄'
-      this.enhancementText = 'Settings changed'
-      this.enhancementHint = 'Click Reprocess to apply new settings'
+      this.enhancementTextKey = 'videoEnhancer.status.settingsChanged'
+      this.enhancementHintKey = 'videoEnhancer.status.settingsHint'
     },
-    
+
     // 开始处理
     startProcessing() {
       if (!this.fileUploaded && !this.filePreview) {
-        this.$message.warning('Please upload a file first')
+        this.$message.warning(this.translate('videoEnhancer.messages.uploadRequired'))
         return
       }
       
@@ -826,7 +854,7 @@ export default {
       link.download = `enhanced_${this.fileName}`
       link.click()
       
-      this.$message.success('Download started')
+      this.$message.success(this.translate('videoEnhancer.messages.downloadStarted'))
     }
   }
 }
@@ -834,4 +862,33 @@ export default {
 
 <style lang="scss" scoped>
 @import './VideoEnhancer.scss';
+
+.language-switcher {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  color: #475569;
+
+  .language-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .language-select {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5f5;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 14px;
+
+    &:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+  }
+}
 </style>
