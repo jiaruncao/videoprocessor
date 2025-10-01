@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Deduplication - Smart Processing</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #1a1d23;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px;
+        }
+
+        .logo::before {
+            content: '🎬';
+            font-size: 30px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #8b92a5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 70%;
+            background: white;
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* Main Container */
+        .main-container {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #f8f9fb;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        /* Workspace Layout */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .workspace-left, .workspace-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Container Styles */
+        .upload-container, .samples-container, .settings-container, .actions-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            font-size: 20px;
+            color: #6366f1;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 40px 20px;
+            background: #fafbfc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .upload-area:hover {
+            border-color: #6366f1;
+            background: #f1f3ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #6366f1;
+            background: #e0e7ff;
+        }
+
+        .upload-area.has-files {
+            border-color: #10b981;
+            background: white;
+            cursor: default;
+            padding: 20px;
+        }
+
+        .upload-content {
+            text-align: center;
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+            color: #6366f1;
+        }
+
+        .upload-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .upload-btn-small {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn-small:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Files List */
+        .files-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            background: #f1f3ff;
+            transform: translateX(5px);
+        }
+
+        .file-icon {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+
+        .file-details {
+            flex: 1;
+        }
+
+        .file-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+            margin-bottom: 2px;
+        }
+
+        .file-info-text {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .remove-file {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .remove-file:hover {
+            background: #dc2626;
+        }
+
+        /* Processing Mode Cards */
+        .mode-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mode-card {
+            padding: 20px;
+            background: #f8f9fb;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .mode-card:hover {
+            background: #f1f3ff;
+            border-color: #6366f1;
+            transform: translateY(-2px);
+        }
+
+        .mode-card.selected {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-color: #6366f1;
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+        }
+
+        .mode-card input[type="radio"] {
+            display: none;
+        }
+
+        .mode-card-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .mode-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .mode-card-desc {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .mode-card.selected .mode-card-desc {
+            opacity: 0.9;
+        }
+
+        /* Collapsible Section */
+        .collapsible-section {
+            margin-top: 20px;
+        }
+
+        #customSettings {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: #f8f9fb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .collapsible-header:hover {
+            background: #f1f3ff;
+        }
+
+        .collapsible-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .collapsible-arrow {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .collapsible-section.expanded .collapsible-arrow {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-section.expanded .collapsible-content {
+            max-height: 1000px;
+            padding-top: 15px;
+        }
+
+        /* Checkbox Styles */
+        .checkbox-group {
+            display: grid;
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .checkbox-item:hover {
+            background: #f8f9fb;
+            border-color: #6366f1;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkbox-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 4px;
+            margin-right: 10px;
+            background: white;
+            color: white;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked ~ .checkbox-icon {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-color: #6366f1;
+        }
+
+        .checkbox-text {
+            font-size: 13px;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        /* Effects Grid */
+        .effect-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .effect-btn {
+            padding: 10px 6px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #475569;
+        }
+
+        .effect-btn:hover {
+            background: #f8f9fb;
+            border-color: #6366f1;
+            transform: translateY(-1px);
+        }
+
+        .effect-btn.selected {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border-color: #6366f1;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .effect-icon {
+            font-size: 18px;
+        }
+
+        /* Zoom Options */
+        .zoom-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .zoom-option {
+            padding: 14px;
+            background: #f8f9fb;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+        }
+
+        .zoom-option:hover {
+            background: #f1f3ff;
+            border-color: #6366f1;
+            transform: translateY(-2px);
+        }
+
+        .zoom-option input[type="radio"] {
+            display: none;
+        }
+
+        .zoom-option.selected {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-color: #6366f1;
+            color: white;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25);
+        }
+
+        .zoom-icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .zoom-label {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .action-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-process {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-process:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-process:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-download {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        /* Process Info */
+        .process-info {
+            padding: 20px;
+            background: #f8f9fb;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .process-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .status-icon {
+            font-size: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            flex: 1;
+            font-size: 14px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .status-percent {
+            font-size: 16px;
+            color: #6366f1;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+        }
+
+        /* Comparison Section */
+        .comparison-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+        }
+
+        .comparison-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .comparison-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .comparison-container {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            padding: 0 20px;
+        }
+
+        .comparison-item {
+            flex: 1;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .comparison-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            background: linear-gradient(135deg, #f8f9fb 0%, #f1f3f5 100%);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .label-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .label-badge.original {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+
+        .label-badge.processed {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #16a34a;
+            border: 1px solid #86efac;
+        }
+
+        .label-info {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .media-wrapper {
+            position: relative;
+            background: #f8f9fb;
+            border-radius: 16px;
+            overflow: hidden;
+            height: 50vh;
+            min-height: 400px;
+            max-height: 600px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .media-wrapper:hover {
+            border-color: #6366f1;
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .comparison-media {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            background: #000;
+        }
+
+        .media-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 251, 0.98));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .placeholder-info {
+            text-align: center;
+            color: #1e293b;
+            padding: 20px;
+        }
+
+        .placeholder-icon {
+            font-size: 56px;
+            margin-bottom: 15px;
+            display: block;
+            opacity: 0.7;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.1));
+        }
+
+        .placeholder-info p {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        .placeholder-info small {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .comparison-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 15px;
+        }
+
+        .divider-icon {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 30px;
+            font-weight: 700;
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 5px 20px rgba(99, 102, 241, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .results-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+
+        .results-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .summary-card {
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fb 0%, #f1f3f5 100%);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .summary-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+            .results-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .comparison-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .comparison-item {
+                max-width: 700px;
+                width: 100%;
+            }
+            .comparison-divider {
+                transform: rotate(90deg);
+                margin: 20px 0;
+            }
+            .media-wrapper {
+                height: 45vh;
+                min-height: 350px;
+                max-height: 500px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .main-container {
+                padding: 20px;
+            }
+            .mode-cards {
+                grid-template-columns: 1fr;
+            }
+            .zoom-options {
+                grid-template-columns: 1fr;
+            }
+            .effect-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .results-summary {
+                grid-template-columns: 1fr;
+            }
+            .media-wrapper {
+                height: 35vh;
+                min-height: 250px;
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">MediaEnhance Pro</div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <span>📊</span> Dashboard
+                </li>
+                <li class="nav-item">
+                    <span>✨</span> Video/Image Enhancer
+                </li>
+                <li class="nav-item">
+                    <span>🧹</span> Watermark Remover
+                </li>
+                <li class="nav-item active">
+                    <span>🔍</span> Video Deduplication
+                </li>
+                <li class="nav-item">
+                    <span>🎨</span> Style Transfer
+                </li>
+                <li class="nav-item">
+                    <span>🔊</span> Audio Enhancement
+                </li>
+                <li class="nav-item">
+                    <span>📁</span> My Projects
+                </li>
+                <li class="nav-item">
+                    <span>⚙️</span> Settings
+                </li>
+            </ul>
+        </nav>
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: auto;">
+            <div class="nav-item" style="background: rgba(255,255,255,0.05); padding: 12px 18px;">
+                <span>👤</span>
+                <div style="flex: 1;">
+                    <div style="color: white; font-size: 14px; font-weight: 600;">User Account</div>
+                    <div style="color: #8b92a5; font-size: 12px; margin-top: 2px;">Pro Plan</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="content-wrapper">
+            <!-- Header -->
+            <div class="header">
+                <h1>Smart Video Deduplication</h1>
+                <p>AI-powered video deduplication with intelligent processing modes and advanced transformation options for professional content optimization.</p>
+            </div>
+
+            <!-- Workspace -->
+            <div class="workspace">
+                <!-- Left Side: Upload Area -->
+                <div class="workspace-left">
+                    <!-- Upload Container -->
+                    <div class="upload-container">
+                        <div class="section-title">
+                            <span class="section-icon">📁</span>
+                            Upload Videos
+                        </div>
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-content" id="uploadContent">
+                                <div class="upload-icon">📹</div>
+                                <div class="upload-title">Drop your videos here</div>
+                                <div class="upload-subtitle">or click to browse</div>
+                                <button class="upload-btn-small" onclick="document.getElementById('fileInput').click()">
+                                    Choose Videos
+                                </button>
+                                <input type="file" id="fileInput" class="file-input" multiple accept=".mp4,.mov,.m4v,.3gp,.avi,.mkv,.webm" onchange="handleFileSelect(event)">
+                            </div>
+                            <div class="files-list" id="filesList" style="display: none;"></div>
+                        </div>
+                        <div style="margin-top: 10px; color: #94a3b8; font-size: 12px; text-align: center;">
+                            Supported: MP4, MOV, M4V, 3GP, AVI, MKV, WebM (Max 500MB)
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="actions-container">
+                        <button class="action-btn btn-process" id="processBtn" onclick="startProcessing()">
+                            <span class="btn-icon">🚀</span>
+                            <span id="btnText">Start Processing</span>
+                        </button>
+                        <button class="action-btn btn-download" id="downloadBtn" style="display: none;" onclick="downloadResults()">
+                            <span class="btn-icon">⬇️</span>
+                            Download Processed Videos
+                        </button>
+                        <div class="process-info" id="processInfo" style="display: none;">
+                            <div class="process-status">
+                                <div class="status-icon">⏳</div>
+                                <div class="status-text">Processing videos...</div>
+                                <div class="status-percent" id="processPercent">0%</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Settings -->
+                <div class="workspace-right">
+                    <!-- Processing Mode -->
+                    <div class="settings-container">
+                        <div class="section-title">
+                            <span class="section-icon">⚙️</span>
+                            Processing Mode
+                        </div>
+                        
+                        <!-- Mode Cards -->
+                        <div class="mode-cards">
+                            <label class="mode-card selected" id="smartMode">
+                                <input type="radio" name="mode" value="smart" checked>
+                                <div class="mode-card-icon">🧠</div>
+                                <div class="mode-card-title">Smart Mode</div>
+                                <div class="mode-card-desc">Optimized settings for best results</div>
+                            </label>
+                            <label class="mode-card" id="customMode">
+                                <input type="radio" name="mode" value="custom">
+                                <div class="mode-card-icon">⚡</div>
+                                <div class="mode-card-title">Custom Mode</div>
+                                <div class="mode-card-desc">Fine-tune all parameters</div>
+                            </label>
+                        </div>
+
+                        <!-- Custom Mode Settings (Hidden by default) -->
+                        <div id="customSettings" style="display: none;">
+                            <!-- Basic Deduplication (Collapsible) -->
+                            <div class="collapsible-section" id="basicSection">
+                                <div class="collapsible-header" onclick="toggleSection('basicSection')">
+                                    <div class="collapsible-title">
+                                        <span>🔧</span>
+                                        <span>Basic Deduplication</span>
+                                    </div>
+                                    <span class="collapsible-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content">
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="basicDedup">
+                                            <span class="checkbox-icon"></span>
+                                            <span class="checkbox-text">Remove Duplicates</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="mirrorFlip">
+                                            <span class="checkbox-icon"></span>
+                                            <span class="checkbox-text">Mirror Flip</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="randomShift">
+                                            <span class="checkbox-icon"></span>
+                                            <span class="checkbox-text">Random Position Shift</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="modifyMd5">
+                                            <span class="checkbox-icon"></span>
+                                            <span class="checkbox-text">Modify MD5 Hash</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="smartExtract">
+                                            <span class="checkbox-icon"></span>
+                                            <span class="checkbox-text">Smart Frame Extraction</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="smartColor">
+                                            <span class="checkbox-icon"></span>
+                                            <span class="checkbox-text">Smart Color Adjustment</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="sharpening">
+                                            <span class="checkbox-icon"></span>
+                                            <span class="checkbox-text">Image Sharpening</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="randomSpeed">
+                                            <span class="checkbox-icon"></span>
+                                            <span class="checkbox-text">Random Speed Variation</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="trimHeadTail">
+                                            <span class="checkbox-icon"></span>
+                                            <span class="checkbox-text">Trim Head/Tail</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="randomMirror">
+                                            <span class="checkbox-icon"></span>
+                                            <span class="checkbox-text">Random Mirror</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Special Effects (Collapsible) -->
+                            <div class="collapsible-section" id="effectsSection">
+                                <div class="collapsible-header" onclick="toggleSection('effectsSection')">
+                                    <div class="collapsible-title">
+                                        <span>✨</span>
+                                        <span>Special Effects</span>
+                                    </div>
+                                    <span class="collapsible-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content">
+                                    <div class="effect-grid">
+                                        <button class="effect-btn" onclick="selectEffect(this, 'scanline')">
+                                            <span class="effect-icon">📺</span>
+                                            <span>Scan Line</span>
+                                        </button>
+                                        <button class="effect-btn" onclick="selectEffect(this, 'spotlight')">
+                                            <span class="effect-icon">💡</span>
+                                            <span>Spotlight</span>
+                                        </button>
+                                        <button class="effect-btn" onclick="selectEffect(this, 'fade')">
+                                            <span class="effect-icon">🌅</span>
+                                            <span>Fade</span>
+                                        </button>
+                                        <button class="effect-btn" onclick="selectEffect(this, 'booklet')">
+                                            <span class="effect-icon">📖</span>
+                                            <span>Booklet</span>
+                                        </button>
+                                        <button class="effect-btn" onclick="selectEffect(this, 'dissolve')">
+                                            <span class="effect-icon">✨</span>
+                                            <span>Dissolve</span>
+                                        </button>
+                                        <button class="effect-btn" onclick="selectEffect(this, 'split')">
+                                            <span class="effect-icon">📱</span>
+                                            <span>Split Screen</span>
+                                        </button>
+                                        <button class="effect-btn" onclick="selectEffect(this, 'product')">
+                                            <span class="effect-icon">🛍️</span>
+                                            <span>Product</span>
+                                        </button>
+                                        <button class="effect-btn" onclick="selectEffect(this, 'film')">
+                                            <span class="effect-icon">🎬</span>
+                                            <span>Film</span>
+                                        </button>
+                                        <button class="effect-btn" onclick="selectEffect(this, 'drama')">
+                                            <span class="effect-icon">🎭</span>
+                                            <span>Drama</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zoom Settings -->
+                    <div class="settings-container" style="margin-top: 20px;">
+                        <div class="section-title">
+                            <span class="section-icon">🔍</span>
+                            Zoom Settings
+                        </div>
+                        <div class="zoom-options">
+                            <label class="zoom-option" onclick="selectZoom(this, 'stretch')">
+                                <input type="radio" name="zoom" value="stretch">
+                                <span class="zoom-icon">↔️</span>
+                                <span class="zoom-label">Stretch</span>
+                            </label>
+                            <label class="zoom-option" onclick="selectZoom(this, 'compress')">
+                                <input type="radio" name="zoom" value="compress">
+                                <span class="zoom-icon">↕️</span>
+                                <span class="zoom-label">Compress</span>
+                            </label>
+                            <label class="zoom-option" onclick="selectZoom(this, 'dynamic')">
+                                <input type="radio" name="zoom" value="dynamic">
+                                <span class="zoom-icon">🔄</span>
+                                <span class="zoom-label">Dynamic</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Section -->
+            <div class="comparison-section" id="comparisonSection">
+                <div class="comparison-header">
+                    <h2 class="comparison-title">Before & After Comparison</h2>
+                </div>
+                <div class="comparison-container">
+                    <!-- Original Video -->
+                    <div class="comparison-item">
+                        <div class="comparison-label">
+                            <span class="label-badge original">Original</span>
+                            <span class="label-info" id="originalInfo">Before Processing</span>
+                        </div>
+                        <div class="media-wrapper">
+                            <img id="originalImage" class="comparison-media" style="display: none;">
+                            <video id="originalVideo" class="comparison-media" controls style="display: none;"></video>
+                            <div class="media-placeholder" id="originalPlaceholder">
+                                <div class="placeholder-info">
+                                    <span class="placeholder-icon">📂</span>
+                                    <p>No file uploaded</p>
+                                    <small>Upload a video to begin</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Divider -->
+                    <div class="comparison-divider">
+                        <div class="divider-icon">VS</div>
+                    </div>
+                    
+                    <!-- Processed Video -->
+                    <div class="comparison-item">
+                        <div class="comparison-label">
+                            <span class="label-badge processed">Processed</span>
+                            <span class="label-info" id="processedInfo">After Deduplication</span>
+                        </div>
+                        <div class="media-wrapper">
+                            <img id="processedImage" class="comparison-media" style="display: none;">
+                            <video id="processedVideo" class="comparison-media" controls style="display: none;"></video>
+                            <div class="media-placeholder" id="processedPlaceholder">
+                                <div class="placeholder-info">
+                                    <span class="placeholder-icon">⏳</span>
+                                    <p>Ready to process</p>
+                                    <small>Click Start Processing to begin</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <h2 class="results-title">Processing Complete</h2>
+                <div class="results-summary">
+                    <div class="summary-card">
+                        <div class="summary-icon">📹</div>
+                        <div class="summary-label">Original Files</div>
+                        <div class="summary-value" id="totalVideos">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">✅</div>
+                        <div class="summary-label">Processed</div>
+                        <div class="summary-value" id="processedVideos">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">⚡</div>
+                        <div class="summary-label">Effects Applied</div>
+                        <div class="summary-value" id="effectsCount">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">💯</div>
+                        <div class="summary-label">Success Rate</div>
+                        <div class="summary-value" id="successRate">100%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global Variables
+        let uploadedFiles = [];
+        let selectedEffect = null;
+        let selectedZoom = null;
+        let processingMode = 'smart';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mode selection
+            document.querySelectorAll('.mode-card input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', handleModeChange);
+            });
+
+            // Initialize checkboxes
+            initializeCheckboxes();
+        });
+
+        // File Handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        function handleFileSelect(event) {
+            handleFiles(event.target.files);
+        }
+
+        function handleFiles(files) {
+            const filesList = document.getElementById('filesList');
+            const uploadContent = document.getElementById('uploadContent');
+            
+            for (let file of files) {
+                if (file.size > 500 * 1024 * 1024) {
+                    alert(`File "${file.name}" exceeds 500MB limit`);
+                    continue;
+                }
+                
+                if (uploadedFiles.find(f => f.name === file.name)) {
+                    continue;
+                }
+                
+                uploadedFiles.push({
+                    file: file,
+                    name: file.name,
+                    size: formatFileSize(file.size),
+                    id: Date.now() + Math.random()
+                });
+            }
+            
+            if (uploadedFiles.length > 0) {
+                uploadContent.style.display = 'none';
+                filesList.style.display = 'block';
+                uploadArea.classList.add('has-files');
+                renderFilesList();
+                
+                // Show first file in comparison
+                showOriginalPreview(uploadedFiles[0]);
+            }
+        }
+
+        function showOriginalPreview(fileData) {
+            const originalPlaceholder = document.getElementById('originalPlaceholder');
+            const originalVideo = document.getElementById('originalVideo');
+            const originalImage = document.getElementById('originalImage');
+            
+            if (fileData.file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    originalPlaceholder.style.display = 'none';
+                    
+                    if (fileData.file.type.startsWith('video/')) {
+                        originalVideo.src = e.target.result;
+                        originalVideo.style.display = 'block';
+                        originalImage.style.display = 'none';
+                    } else if (fileData.file.type.startsWith('image/')) {
+                        originalImage.src = e.target.result;
+                        originalImage.style.display = 'block';
+                        originalVideo.style.display = 'none';
+                    }
+                };
+                reader.readAsDataURL(fileData.file);
+            }
+            
+            // Update processed placeholder
+            const processedPlaceholder = document.getElementById('processedPlaceholder');
+            processedPlaceholder.innerHTML = `
+                <div class="placeholder-info">
+                    <span class="placeholder-icon">⏳</span>
+                    <p>Ready to process</p>
+                    <small>Click Start Processing to begin</small>
+                </div>
+            `;
+        }
+
+        function renderFilesList() {
+            const filesList = document.getElementById('filesList');
+            filesList.innerHTML = '';
+            
+            uploadedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div class="file-icon">🎥</div>
+                    <div class="file-details">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-info-text">${file.size}</div>
+                    </div>
+                    <button class="remove-file" onclick="removeFileFromList(${index})">✕</button>
+                `;
+                filesList.appendChild(fileItem);
+            });
+        }
+
+        function removeFileFromList(index) {
+            uploadedFiles.splice(index, 1);
+            
+            if (uploadedFiles.length === 0) {
+                document.getElementById('uploadContent').style.display = 'block';
+                document.getElementById('filesList').style.display = 'none';
+                document.getElementById('uploadArea').classList.remove('has-files');
+                document.getElementById('resultsSection').style.display = 'none';
+                
+                // Reset comparison view
+                resetComparisonView();
+            } else {
+                renderFilesList();
+                // Show the first remaining file
+                showOriginalPreview(uploadedFiles[0]);
+            }
+        }
+
+        function resetComparisonView() {
+            // Hide media elements
+            document.getElementById('originalVideo').style.display = 'none';
+            document.getElementById('originalImage').style.display = 'none';
+            document.getElementById('processedVideo').style.display = 'none';
+            document.getElementById('processedImage').style.display = 'none';
+            
+            // Show placeholders
+            document.getElementById('originalPlaceholder').style.display = 'flex';
+            document.getElementById('processedPlaceholder').style.display = 'flex';
+            
+            // Reset placeholder content
+            document.getElementById('originalPlaceholder').innerHTML = `
+                <div class="placeholder-info">
+                    <span class="placeholder-icon">📂</span>
+                    <p>No file uploaded</p>
+                    <small>Upload a video to begin</small>
+                </div>
+            `;
+            document.getElementById('processedPlaceholder').innerHTML = `
+                <div class="placeholder-info">
+                    <span class="placeholder-icon">⏳</span>
+                    <p>Ready to process</p>
+                    <small>Click Start Processing to begin</small>
+                </div>
+            `;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Mode Handling
+        function handleModeChange(e) {
+            processingMode = e.target.value;
+            const isCustom = processingMode === 'custom';
+            
+            // Update card styles
+            document.getElementById('smartMode').classList.toggle('selected', !isCustom);
+            document.getElementById('customMode').classList.toggle('selected', isCustom);
+            
+            // Show/hide custom settings section
+            const customSettings = document.getElementById('customSettings');
+            if (isCustom) {
+                customSettings.style.display = 'block';
+                // Animate appearance
+                setTimeout(() => {
+                    customSettings.style.opacity = '1';
+                }, 10);
+            } else {
+                customSettings.style.opacity = '0';
+                setTimeout(() => {
+                    customSettings.style.display = 'none';
+                }, 300);
+                
+                // Reset all selections when switching back to Smart Mode
+                document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    updateCheckboxVisual(cb);
+                });
+                
+                // Clear selected effects
+                document.querySelectorAll('.effect-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                selectedEffect = null;
+            }
+        }
+
+        // Collapsible Sections
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            section.classList.toggle('expanded');
+        }
+
+        // Checkbox Handling
+        function initializeCheckboxes() {
+            document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateCheckboxVisual(this);
+                });
+                updateCheckboxVisual(checkbox);
+            });
+        }
+
+        function updateCheckboxVisual(checkbox) {
+            const icon = checkbox.nextElementSibling;
+            if (checkbox.checked) {
+                icon.textContent = '✓';
+            } else {
+                icon.textContent = '';
+            }
+        }
+
+        // Effect Selection
+        function selectEffect(btn, effect) {
+            if (btn.disabled) return;
+            
+            document.querySelectorAll('.effect-btn').forEach(b => {
+                b.classList.remove('selected');
+            });
+            
+            if (selectedEffect === effect) {
+                selectedEffect = null;
+            } else {
+                btn.classList.add('selected');
+                selectedEffect = effect;
+            }
+        }
+
+        // Zoom Selection
+        function selectZoom(option, type) {
+            document.querySelectorAll('.zoom-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            if (selectedZoom === type) {
+                selectedZoom = null;
+            } else {
+                option.classList.add('selected');
+                selectedZoom = type;
+            }
+        }
+
+        // Processing
+        function startProcessing() {
+            if (uploadedFiles.length === 0) {
+                alert('Please upload videos first');
+                return;
+            }
+            
+            const processBtn = document.getElementById('processBtn');
+            const processInfo = document.getElementById('processInfo');
+            const progressFill = document.getElementById('progressFill');
+            const processPercent = document.getElementById('processPercent');
+            
+            processBtn.disabled = true;
+            processInfo.style.display = 'block';
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    setTimeout(() => {
+                        processBtn.disabled = false;
+                        processInfo.style.display = 'none';
+                        showResults();
+                    }, 500);
+                }
+                
+                progressFill.style.width = progress + '%';
+                processPercent.textContent = Math.round(progress) + '%';
+            }, 200);
+        }
+
+        function showResults() {
+            let effectsCount = 0;
+            
+            if (processingMode === 'smart') {
+                // Smart mode has predefined optimizations
+                effectsCount = 8; // Smart Mode includes: dedup, MD5, frame extraction, color, sharpening, speed variation, etc.
+            } else {
+                // Count custom selections
+                document.querySelectorAll('#customSettings .checkbox-item input[type="checkbox"]:checked').forEach(() => effectsCount++);
+                if (selectedEffect) effectsCount++;
+                if (selectedZoom) effectsCount++;
+            }
+            
+            // Update statistics
+            document.getElementById('totalVideos').textContent = uploadedFiles.length;
+            document.getElementById('processedVideos').textContent = uploadedFiles.length;
+            document.getElementById('effectsCount').textContent = effectsCount;
+            document.getElementById('successRate').textContent = '100%';
+            
+            // Show processed video in comparison
+            showProcessedPreview();
+            
+            // Show results section
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('downloadBtn').style.display = 'block';
+            
+            const modeText = processingMode === 'smart' ? 'Smart Mode optimization' : 'custom settings';
+            alert(`Successfully processed ${uploadedFiles.length} video(s) with ${modeText}!\n${effectsCount} effect(s) applied.`);
+        }
+
+        function showProcessedPreview() {
+            const processedPlaceholder = document.getElementById('processedPlaceholder');
+            const processedVideo = document.getElementById('processedVideo');
+            const processedImage = document.getElementById('processedImage');
+            const originalVideo = document.getElementById('originalVideo');
+            const originalImage = document.getElementById('originalImage');
+            
+            // Hide placeholder
+            processedPlaceholder.style.display = 'none';
+            
+            // Copy original media to processed (simulating processing)
+            if (originalVideo.style.display === 'block') {
+                processedVideo.src = originalVideo.src;
+                processedVideo.style.display = 'block';
+                processedImage.style.display = 'none';
+                
+                // Add visual effect to show it's processed
+                processedVideo.style.filter = 'contrast(1.1) brightness(1.05) saturate(1.1)';
+            } else if (originalImage.style.display === 'block') {
+                processedImage.src = originalImage.src;
+                processedImage.style.display = 'block';
+                processedVideo.style.display = 'none';
+                
+                // Add visual effect to show it's processed
+                processedImage.style.filter = 'contrast(1.1) brightness(1.05) saturate(1.1)';
+            }
+            
+            // Update info labels
+            document.getElementById('originalInfo').textContent = 'Original File';
+            document.getElementById('processedInfo').textContent = `Processed (${processingMode === 'smart' ? 'Smart Mode' : 'Custom Mode'})`;
+        }
+
+        function downloadResults() {
+            const report = {
+                processDate: new Date().toISOString(),
+                mode: processingMode,
+                totalFiles: uploadedFiles.length,
+                selectedEffect: selectedEffect,
+                selectedZoom: selectedZoom,
+                files: uploadedFiles.map(f => ({
+                    name: f.name,
+                    size: f.size,
+                    processed: true
+                }))
+            };
+            
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'processing_report.json';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            alert('Processing report downloaded successfully!');
+        }
+    </script>
+</body>
+</html>

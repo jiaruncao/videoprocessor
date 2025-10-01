@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noise Reducer - AI Audio Enhancement</title>
+    <style>
+        /* 全局样式 - 复用自watermark-remover.html */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* 侧边栏样式 - 复用自watermark-remover.html */
+        .sidebar {
+            width: 260px;
+            background: #1a1d23;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px;
+        }
+
+        .logo::before {
+            content: '🎬';
+            font-size: 30px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #8b92a5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 70%;
+            background: white;
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* 主内容区域 - 复用自watermark-remover.html */
+        .main-container {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #f8f9fb;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 标题区域 - 复用自watermark-remover.html */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        /* 工作区布局 - 修改为单列或2列 */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .workspace-left, .workspace-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 通用容器样式 - 复用自watermark-remover.html */
+        .upload-container, .samples-container, .actions-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        /* 上传区域 - 复用自watermark-remover.html */
+        .upload-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 40px 20px;
+            background: #fafbfc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .upload-area:hover {
+            border-color: #6366f1;
+            background: #f1f3ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #6366f1;
+            background: #e0e7ff;
+        }
+
+        .upload-area.has-file {
+            border-color: #10b981;
+            background: white;
+            cursor: default;
+        }
+
+        .upload-content {
+            text-align: center;
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+            color: #6366f1;
+        }
+
+        .upload-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .upload-btn-small {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn-small:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* 文件预览 - 复用自watermark-remover.html */
+        .file-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 10px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .file-preview-item {
+            width: 100%;
+            height: calc(100% - 40px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8f9fb 0%, #f1f3f5 100%);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            flex-direction: column;
+        }
+
+        /* 音频波形预览 - 新增样式 */
+        .audio-waveform {
+            width: 90%;
+            height: 80px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 10px;
+        }
+
+        .waveform-bar {
+            width: 3px;
+            background: white;
+            border-radius: 2px;
+            animation: wave 1.5s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { height: 20px; }
+            50% { height: 40px; }
+        }
+
+        .waveform-bar:nth-child(1) { animation-delay: 0s; height: 30px; }
+        .waveform-bar:nth-child(2) { animation-delay: 0.1s; height: 40px; }
+        .waveform-bar:nth-child(3) { animation-delay: 0.2s; height: 25px; }
+        .waveform-bar:nth-child(4) { animation-delay: 0.3s; height: 45px; }
+        .waveform-bar:nth-child(5) { animation-delay: 0.4s; height: 35px; }
+        .waveform-bar:nth-child(6) { animation-delay: 0.5s; height: 50px; }
+        .waveform-bar:nth-child(7) { animation-delay: 0.6s; height: 30px; }
+        .waveform-bar:nth-child(8) { animation-delay: 0.7s; height: 40px; }
+
+        .audio-info {
+            margin-top: 15px;
+            text-align: center;
+            color: #475569;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* 上传成功标记 - 复用自watermark-remover.html */
+        .upload-success-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #10b981;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            animation: scaleIn 0.3s ease;
+            z-index: 10;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding: 0 5px;
+        }
+
+        .file-info span {
+            font-size: 13px;
+            color: #64748b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .remove-file {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-file:hover {
+            background: #dc2626;
+        }
+
+        .supported-formats {
+            margin-top: 10px;
+            color: #94a3b8;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* 示例样式 - 复用自watermark-remover.html */
+        .samples-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .sample-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .sample-item {
+            aspect-ratio: 1;
+            background: #f8f9fb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .sample-item:hover {
+            transform: scale(1.05);
+            border-color: #6366f1;
+            background: #f1f3ff;
+        }
+
+        .sample-icon {
+            font-size: 24px;
+        }
+
+        .sample-text {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* 操作按钮 - 复用自watermark-remover.html */
+        .actions-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .action-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-process {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-process:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-process:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-download-preview {
+            background: white;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+        }
+
+        .btn-download-preview:hover {
+            background: #f1f3ff;
+            transform: translateY(-2px);
+        }
+
+        .btn-download-full {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-download-full:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-icon {
+            font-size: 20px;
+        }
+
+        /* 处理状态 - 复用自watermark-remover.html */
+        .process-info {
+            padding: 20px;
+            background: #f8f9fb;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .process-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .status-icon {
+            font-size: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            flex: 1;
+            font-size: 14px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .status-percent {
+            font-size: 16px;
+            color: #6366f1;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .process-details {
+            text-align: center;
+            margin-top: 10px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        /* 结果对比区域 - 基于watermark-remover.html修改 */
+        .comparison-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+        }
+
+        .comparison-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .comparison-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .comparison-container {
+            display: flex;
+            gap: 30px;
+            align-items: stretch;
+            justify-content: center;
+            padding: 0 20px;
+        }
+
+        .comparison-item {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .comparison-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            background: linear-gradient(135deg, #f8f9fb 0%, #f1f3f5 100%);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .label-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .label-badge.original {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+
+        .label-badge.processed {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #16a34a;
+            border: 1px solid #86efac;
+        }
+
+        .label-info {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* 视频预览容器 */
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            height: 50vh;
+            min-height: 400px;
+            max-height: 600px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .video-wrapper:hover {
+            border-color: #6366f1;
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.15);
+        }
+
+        .comparison-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* 播放覆盖层 */
+        .video-play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 32px;
+            color: #6366f1;
+        }
+
+        .video-play-overlay:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        /* 预览标签 */
+        .preview-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        /* 占位符 - 复用自watermark-remover.html */
+        .upload-placeholder, .process-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 251, 0.98));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .placeholder-info {
+            text-align: center;
+            color: #1e293b;
+            padding: 20px;
+        }
+
+        .placeholder-icon {
+            font-size: 56px;
+            margin-bottom: 15px;
+            display: block;
+            opacity: 0.7;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.1));
+        }
+
+        .placeholder-info p {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        .placeholder-info small {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* 响应式设计 - 复用自watermark-remover.html */
+        @media (max-width: 1200px) {
+            .comparison-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comparison-item {
+                max-width: 700px;
+                width: 100%;
+            }
+
+            .video-wrapper {
+                height: 45vh;
+                min-height: 350px;
+                max-height: 500px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .video-wrapper {
+                height: 40vh;
+                min-height: 300px;
+                max-height: 450px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-container {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .sample-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .comparison-title {
+                font-size: 24px;
+            }
+
+            .video-wrapper {
+                height: 35vh;
+                min-height: 250px;
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="logo">MediaEnhance Pro</div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <span>📊</span> Dashboard
+                </li>
+                <li class="nav-item">
+                    <span>✨</span> Video/Image Enhancer
+                </li>
+                <li class="nav-item">
+                    <span>🧹</span> Watermark Remover
+                </li>
+                <li class="nav-item active">
+                    <span>🔇</span> Noise Reducer
+                </li>
+                <li class="nav-item">
+                    <span>🎨</span> Style Transfer
+                </li>
+                <li class="nav-item">
+                    <span>📁</span> My Projects
+                </li>
+                <li class="nav-item">
+                    <span>⚙️</span> Settings
+                </li>
+            </ul>
+        </nav>
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: auto;">
+            <div class="nav-item" style="background: rgba(255,255,255,0.05); padding: 12px 18px;">
+                <span>👤</span>
+                <div style="flex: 1;">
+                    <div style="color: white; font-size: 14px; font-weight: 600;">User Account</div>
+                    <div style="color: #8b92a5; font-size: 12px; margin-top: 2px;">Pro Member</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-container">
+        <div class="content-wrapper">
+            <!-- 标题区域 -->
+            <div class="header">
+                <h1>Noise Reducer</h1>
+                <p>Remove background noise from videos with AI for clear, crisp sound. Ideal for podcasts, narration, and voiceovers.</p>
+            </div>
+
+            <!-- 主要工作区 -->
+            <div class="workspace">
+                <!-- 左侧：上传和预览区域 -->
+                <div class="workspace-left">
+                    <!-- 上传区域 -->
+                    <div class="upload-container">
+                        <div class="section-title">Upload Media</div>
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-success-badge" id="uploadSuccessBadge" style="display: none;">✔</div>
+                            <div class="upload-content" id="uploadContent">
+                                <div class="upload-icon">⬆️</div>
+                                <div class="upload-title">Click, drop, or paste files to upload</div>
+                                <div class="upload-subtitle">Up to 8 files can be uploaded at a time</div>
+                                <button class="upload-btn-small" onclick="document.getElementById('fileInput').click()">
+                                    Choose Files
+                                </button>
+                                <input type="file" id="fileInput" class="file-input" multiple accept=".mp4,.mov,.m4v,.3gp,.avi" onchange="handleFileSelect(event)">
+                            </div>
+                            <!-- 文件预览将在这里显示 -->
+                            <div class="file-preview" id="filePreview" style="display: none;">
+                                <div class="file-preview-item">
+                                    <!-- 视频预览 -->
+                                    <video id="previewVideo" controls style="display: block; width: 100%; height: 100%;"></video>
+                                </div>
+                                <div class="file-info">
+                                    <span id="fileName">No file selected</span>
+                                    <button class="remove-file" onclick="removeFile()">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="supported-formats">
+                            Support format: .mp4, .mov, .m4v, .3gp, .avi</div>
+                    </div>
+
+                    <!-- 示例文件 -->
+                    <div class="samples-container">
+                        <div class="section-title">Quick Samples</div>
+                        <div class="sample-grid">
+                            <div class="sample-item" onclick="loadSample('podcast')" title="Podcast Sample">
+                                <div class="sample-icon">🎙️</div>
+                                <div class="sample-text">Podcast</div>
+                            </div>
+                            <div class="sample-item" onclick="loadSample('meeting')" title="Meeting Sample">
+                                <div class="sample-icon">👥</div>
+                                <div class="sample-text">Meeting</div>
+                            </div>
+                            <div class="sample-item" onclick="loadSample('outdoor')" title="Outdoor Sample">
+                                <div class="sample-icon">🌳</div>
+                                <div class="sample-text">Outdoor</div>
+                            </div>
+                            <div class="sample-item" onclick="loadSample('traffic')" title="Traffic Sample">
+                                <div class="sample-icon">🚗</div>
+                                <div class="sample-text">Traffic</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧：操作按钮 -->
+                <div class="workspace-right">
+                    <!-- 操作按钮 -->
+                    <div class="actions-container">
+                        <button class="action-btn btn-process" id="processBtn" onclick="startProcessing()">
+                            <span class="btn-icon">🔇</span>
+                            <span id="btnText">Reduce Noise</span>
+                        </button>
+                        <button class="action-btn btn-download-preview" id="downloadPreviewBtn" style="display: none;" onclick="downloadPreview()">
+                            <span class="btn-icon">👁️</span>
+                            Download 5s Preview Video
+                            <span style="font-size: 12px; opacity: 0.8;">Free!</span>
+                        </button>
+                        <button class="action-btn btn-download-full" id="downloadFullBtn" style="display: none;" onclick="downloadFull()">
+                            <span class="btn-icon">⬇️</span>
+                            Download Full Video
+                            <span style="font-size: 12px; opacity: 0.8;">You are Pro member</span>
+                        </button>
+                        <div class="process-info" id="processInfo" style="display: none;">
+                            <div class="process-status">
+                                <div class="status-icon">⏳</div>
+                                <div class="status-text">Processing audio...</div>
+                                <div class="status-percent" id="processPercent">0%</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="process-details">
+                                <small>Analyzing frequencies • Removing noise • Enhancing clarity</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结果对比区域 -->
+            <div class="comparison-section" id="comparisonSection">
+                <div class="comparison-header">
+                    <h2 class="comparison-title">Audio Comparison</h2>
+                </div>
+
+                <div class="comparison-container">
+                    <!-- 原始视频 -->
+                    <div class="comparison-item">
+                        <div class="comparison-label">
+                            <span class="label-badge original">Original</span>
+                            <span class="label-info" id="originalInfo"></span>
+                        </div>
+                        <div class="video-wrapper">
+                            <video id="originalVideo" class="comparison-video" controls style="display: none;"></video>
+                            <div class="upload-placeholder" id="originalPlaceholder">
+                                <div class="placeholder-info">
+                                    <span class="placeholder-icon">📂</span>
+                                    <p>test_video copy 2.mp4</p>
+                                    <small>Ready to process</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 处理后的视频 -->
+                    <div class="comparison-item">
+                        <div class="comparison-label">
+                            <span class="label-badge processed">After</span>
+                            <span class="label-info" id="processedInfo"></span>
+                        </div>
+                        <div class="video-wrapper">
+                            <div class="preview-badge" id="previewBadge" style="display: none;">5s Preview</div>
+                            <video id="processedVideo" class="comparison-video" controls style="display: none;"></video>
+                            <div class="video-play-overlay" id="playOverlay" style="display: none;" onclick="playProcessedVideo()">
+                                ▶️
+                            </div>
+                            <div class="process-placeholder" id="processedPlaceholder">
+                                <div class="placeholder-info">
+                                    <span class="placeholder-icon">⏳</span>
+                                    <p>To be processed</p>
+                                    <small>Click Reduce Noise to begin</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 全局变量
+        let currentFile = null;
+        let isProcessed = false;
+        let processingComplete = false;
+
+        // 文件拖拽功能
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (!currentFile) {
+                uploadArea.classList.add('dragover');
+            }
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (!currentFile) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+
+        // 处理文件选择
+        function handleFileSelect(event) {
+            handleFiles(event.target.files);
+        }
+
+        // 处理文件
+        function handleFiles(files) {
+            if (files.length > 0) {
+                if (files.length > 8) {
+                    alert('Maximum 8 files allowed at once');
+                    return;
+                }
+
+                // 保存文件并显示预览
+                currentFile = files[0];
+                displayPreview(currentFile);
+                
+                // 延迟显示成功标记
+                setTimeout(() => {
+                    showUploadSuccess();
+                    showComparisonWithFile();
+                    resetProcessingState();
+                }, 500);
+            }
+        }
+
+        // 显示上传成功标记
+        function showUploadSuccess() {
+            const badge = document.getElementById('uploadSuccessBadge');
+            const uploadArea = document.getElementById('uploadArea');
+            badge.style.display = 'flex';
+            uploadArea.classList.add('has-file');
+        }
+
+        // 显示预览
+        function displayPreview(file) {
+            const reader = new FileReader();
+            const filePreview = document.getElementById('filePreview');
+            const uploadContent = document.getElementById('uploadContent');
+            const previewVideo = document.getElementById('previewVideo');
+            const fileName = document.getElementById('fileName');
+
+            reader.onload = function(e) {
+                uploadContent.style.display = 'none';
+                filePreview.style.display = 'block';
+                fileName.textContent = file.name;
+                
+                // 显示视频预览
+                previewVideo.src = e.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // 显示对比区域
+        function showComparisonWithFile() {
+            const previewVideo = document.getElementById('previewVideo');
+            
+            // 更新左侧占位符显示文件名
+            document.getElementById('originalPlaceholder').innerHTML = `
+                <div class="placeholder-info">
+                    <span class="placeholder-icon">📂</span>
+                    <p>${currentFile ? currentFile.name : 'test_video copy 2.mp4'}</p>
+                    <small>Ready to process</small>
+                </div>
+            `;
+            
+            // 更新右侧为待处理状态
+            document.getElementById('processedPlaceholder').style.display = 'flex';
+            document.getElementById('processedPlaceholder').innerHTML = `
+                <div class="placeholder-info">
+                    <span class="placeholder-icon">⏳</span>
+                    <p>Ready to process</p>
+                    <small>Click Reduce Noise to begin</small>
+                </div>
+            `;
+            
+            // 如果是视频文件，设置原始视频
+            if (previewVideo.src) {
+                setTimeout(() => {
+                    setupOriginalVideo(previewVideo.src);
+                }, 100);
+            }
+        }
+
+        // 设置原始视频
+        function setupOriginalVideo(src) {
+            const originalVideo = document.getElementById('originalVideo');
+            const originalPlaceholder = document.getElementById('originalPlaceholder');
+            
+            originalVideo.src = src;
+            originalVideo.style.display = 'block';
+            originalPlaceholder.style.display = 'none';
+        }
+
+        // 移除文件
+        function removeFile() {
+            document.getElementById('uploadContent').style.display = 'block';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('previewVideo').src = '';
+            document.getElementById('uploadSuccessBadge').style.display = 'none';
+            document.getElementById('uploadArea').classList.remove('has-file');
+            
+            // 重置对比区域
+            resetComparisonToInitial();
+            
+            currentFile = null;
+            resetProcessingState();
+        }
+
+        // 重置对比区域到初始状态
+        function resetComparisonToInitial() {
+            // 重置左侧
+            document.getElementById('originalPlaceholder').style.display = 'flex';
+            document.getElementById('originalPlaceholder').innerHTML = `
+                <div class="placeholder-info">
+                    <span class="placeholder-icon">📂</span>
+                    <p>test_video copy 2.mp4</p>
+                    <small>Ready to process</small>
+                </div>
+            `;
+            document.getElementById('originalVideo').style.display = 'none';
+            
+            // 重置右侧
+            document.getElementById('processedPlaceholder').style.display = 'flex';
+            document.getElementById('processedPlaceholder').innerHTML = `
+                <div class="placeholder-info">
+                    <span class="placeholder-icon">⏳</span>
+                    <p>To be processed</p>
+                    <small>Click Reduce Noise to begin</small>
+                </div>
+            `;
+            
+            // 隐藏处理后内容
+            document.getElementById('processedVideo').style.display = 'none';
+            document.getElementById('playOverlay').style.display = 'none';
+            document.getElementById('previewBadge').style.display = 'none';
+        }
+
+        // 加载示例
+        function loadSample(type) {
+            const filePreview = document.getElementById('filePreview');
+            const uploadContent = document.getElementById('uploadContent');
+            const previewVideo = document.getElementById('previewVideo');
+            const fileName = document.getElementById('fileName');
+
+            uploadContent.style.display = 'none';
+            filePreview.style.display = 'block';
+            fileName.textContent = `${type}_sample.mp4`;
+
+            // 显示为视频预览
+            previewVideo.poster = '';
+            
+            // 延迟显示成功标记
+            setTimeout(() => {
+                showUploadSuccess();
+                showComparisonWithFile();
+                resetProcessingState();
+            }, 500);
+            
+            currentFile = { name: `${type}_sample.mp4`, type: 'video/mp4' };
+        }
+
+        // 重置处理状态
+        function resetProcessingState() {
+            const processBtn = document.getElementById('processBtn');
+            const downloadPreviewBtn = document.getElementById('downloadPreviewBtn');
+            const downloadFullBtn = document.getElementById('downloadFullBtn');
+            const btnText = document.getElementById('btnText');
+            const processInfo = document.getElementById('processInfo');
+            
+            processBtn.style.display = 'block';
+            processBtn.disabled = false;
+            downloadPreviewBtn.style.display = 'none';
+            downloadFullBtn.style.display = 'none';
+            btnText.textContent = 'Reduce Noise';
+            processInfo.style.display = 'none';
+            
+            processingComplete = false;
+        }
+
+        // 开始处理
+        function startProcessing() {
+            const processBtn = document.getElementById('processBtn');
+            const downloadPreviewBtn = document.getElementById('downloadPreviewBtn');
+            const downloadFullBtn = document.getElementById('downloadFullBtn');
+            const processInfo = document.getElementById('processInfo');
+            const progressFill = document.getElementById('progressFill');
+            const processPercent = document.getElementById('processPercent');
+
+            // 显示处理状态
+            processBtn.disabled = true;
+            processInfo.style.display = 'block';
+
+            // 模拟处理进度
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    // 处理完成
+                    setTimeout(() => {
+                        processBtn.style.display = 'none';
+                        downloadPreviewBtn.style.display = 'block';
+                        downloadFullBtn.style.display = 'block';
+                        processInfo.innerHTML = `
+                            <div style="text-align: center; padding: 20px;">
+                                <div style="font-size: 48px; margin-bottom: 10px;">✅</div>
+                                <div style="font-size: 16px; color: #10b981; font-weight: 600;">Noise Reduction Complete!</div>
+                                <div style="font-size: 14px; color: #64748b; margin-top: 5px;">Your clean audio is ready</div>
+                            </div>
+                        `;
+                        
+                        processingComplete = true;
+                        showProcessedResult();
+                    }, 500);
+                }
+                progressFill.style.width = progress + '%';
+                processPercent.textContent = Math.round(progress) + '%';
+            }, 200);
+        }
+
+        // 显示处理后的结果
+        function showProcessedResult() {
+            // 隐藏覆盖层，显示处理后的内容
+            document.getElementById('processedPlaceholder').style.display = 'none';
+            document.getElementById('processedVideo').style.display = 'block';
+            document.getElementById('playOverlay').style.display = 'flex';
+            document.getElementById('previewBadge').style.display = 'block';
+            
+            // 设置处理后的视频
+            const originalVideo = document.getElementById('originalVideo');
+            const processedVideo = document.getElementById('processedVideo');
+            if (originalVideo.src) {
+                processedVideo.src = originalVideo.src;
+            }
+        }
+
+        // 播放处理后的视频
+        function playProcessedVideo() {
+            const processedVideo = document.getElementById('processedVideo');
+            const playOverlay = document.getElementById('playOverlay');
+            
+            if (processedVideo.paused) {
+                processedVideo.play();
+                playOverlay.style.display = 'none';
+            } else {
+                processedVideo.pause();
+                playOverlay.style.display = 'flex';
+            }
+        }
+
+        // 下载预览
+        function downloadPreview() {
+            alert('Downloading 5s preview video...');
+        }
+
+        // 下载完整版
+        function downloadFull() {
+            alert('Downloading full video...');
+        }
+    </script>
+</body>
+</html>

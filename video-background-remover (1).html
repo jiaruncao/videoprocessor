@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Background Remover - User Dashboard</title>
+    <style>
+        /* 全局样式 - 复用自watermark-remover.html */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* 侧边栏样式 - 复用自watermark-remover.html */
+        .sidebar {
+            width: 260px;
+            background: #1a1d23;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px;
+        }
+
+        .logo::before {
+            content: '🎬';
+            font-size: 30px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #8b92a5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 70%;
+            background: white;
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* 主内容区域 - 复用自watermark-remover.html */
+        .main-container {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #f8f9fb;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 标题区域 - 复用自watermark-remover.html */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        /* 工作区布局 - 复用自watermark-remover.html */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .workspace-left, .workspace-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 通用容器样式 - 复用自watermark-remover.html */
+        .upload-container, .settings-container, .actions-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        /* 上传区域 - 复用自watermark-remover.html */
+        .upload-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 40px 20px;
+            background: #fafbfc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .upload-area:hover {
+            border-color: #6366f1;
+            background: #f1f3ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #6366f1;
+            background: #e0e7ff;
+        }
+
+        .upload-area.has-file {
+            border-color: #10b981;
+            background: white;
+            cursor: default;
+        }
+
+        .upload-content {
+            text-align: center;
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+            color: #6366f1;
+        }
+
+        .upload-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .upload-btn-small {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn-small:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* 文件预览 - 复用自watermark-remover.html */
+        .file-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 10px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .file-preview-item {
+            width: 100%;
+            height: calc(100% - 40px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .file-preview-item video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* 上传成功标记 - 复用自watermark-remover.html */
+        .upload-success-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #10b981;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            animation: scaleIn 0.3s ease;
+            z-index: 10;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding: 0 5px;
+        }
+
+        .file-info span {
+            font-size: 13px;
+            color: #64748b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .remove-file {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-file:hover {
+            background: #dc2626;
+        }
+
+        .supported-formats {
+            margin-top: 10px;
+            color: #94a3b8;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* 背景选择设置 */
+        .background-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .bg-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .bg-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .bg-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: #f8f9fb;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .bg-option:hover .bg-content {
+            border-color: #6366f1;
+            background: #f1f3ff;
+            transform: translateY(-2px);
+        }
+
+        .bg-option input[type="radio"]:checked + .bg-content {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+        }
+
+        .bg-icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+        }
+
+        .bg-icon.green {
+            background: #10b981;
+        }
+
+        .bg-icon.transparent {
+            background: repeating-conic-gradient(#e2e8f0 0deg 90deg, #cbd5e1 90deg 180deg);
+        }
+
+        .bg-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* 操作按钮 - 复用自watermark-remover.html */
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .action-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-process {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-process:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-process:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-preview {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-preview:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .btn-download {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-icon {
+            font-size: 20px;
+        }
+
+        /* 处理状态 - 复用自watermark-remover.html */
+        .process-info {
+            padding: 20px;
+            background: #f8f9fb;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .process-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .status-icon {
+            font-size: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            flex: 1;
+            font-size: 14px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .status-percent {
+            font-size: 16px;
+            color: #6366f1;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .process-details {
+            text-align: center;
+            margin-top: 10px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        /* 视频对比区域 */
+        .comparison-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+        }
+
+        .comparison-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .comparison-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .comparison-container {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            padding: 0 20px;
+        }
+
+        .comparison-item {
+            flex: 1;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .comparison-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            background: linear-gradient(135deg, #f8f9fb 0%, #f1f3f5 100%);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .label-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .label-badge.original {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+
+        .label-badge.processed {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #16a34a;
+            border: 1px solid #86efac;
+        }
+
+        .label-info {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            height: 50vh;
+            min-height: 400px;
+            max-height: 600px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-wrapper:hover {
+            border-color: #6366f1;
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.15);
+            transform: translateY(-2px);
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+
+        /* 视频控制 */
+        .video-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .preview-time {
+            color: white;
+            font-size: 12px;
+            margin: 0 10px;
+        }
+
+        /* 占位符 */
+        .upload-placeholder, .process-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 251, 0.98));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .placeholder-info {
+            text-align: center;
+            color: #1e293b;
+            padding: 20px;
+        }
+
+        .placeholder-icon {
+            font-size: 56px;
+            margin-bottom: 15px;
+            display: block;
+            opacity: 0.7;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.1));
+        }
+
+        .placeholder-info p {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        .placeholder-info small {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* 响应式设计 - 复用自watermark-remover.html */
+        @media (max-width: 1200px) {
+            .comparison-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comparison-item {
+                max-width: 700px;
+                width: 100%;
+            }
+
+            .canvas-wrapper {
+                height: 45vh;
+                min-height: 350px;
+                max-height: 500px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .canvas-wrapper {
+                height: 40vh;
+                min-height: 300px;
+                max-height: 450px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-container {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .comparison-title {
+                font-size: 24px;
+            }
+
+            .canvas-wrapper {
+                height: 35vh;
+                min-height: 250px;
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="logo">MediaEnhance Pro</div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <span>📊</span> Dashboard
+                </li>
+                <li class="nav-item">
+                    <span>✨</span> Video/Image Enhancer
+                </li>
+                <li class="nav-item">
+                    <span>🧹</span> Watermark Remover
+                </li>
+                <li class="nav-item active">
+                    <span>🎥</span> Background Remover
+                </li>
+                <li class="nav-item">
+                    <span>🎨</span> Style Transfer
+                </li>
+                <li class="nav-item">
+                    <span>📁</span> My Projects
+                </li>
+                <li class="nav-item">
+                    <span>⚙️</span> Settings
+                </li>
+            </ul>
+        </nav>
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: auto;">
+            <div class="nav-item" style="background: rgba(255,255,255,0.05); padding: 12px 18px;">
+                <span>👤</span>
+                <div style="flex: 1;">
+                    <div style="color: white; font-size: 14px; font-weight: 600;">User Account</div>
+                    <div style="color: #8b92a5; font-size: 12px; margin-top: 2px;">Pro Member</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-container">
+        <div class="content-wrapper">
+            <!-- 标题区域 -->
+            <div class="header">
+                <h1>Video Background Remover</h1>
+                <p>Remove the background from your video and replace it with a green or transparent background with just one click.</p>
+            </div>
+
+            <!-- 主要工作区 -->
+            <div class="workspace">
+                <!-- 左侧：上传区域 -->
+                <div class="workspace-left">
+                    <!-- 上传区域 -->
+                    <div class="upload-container">
+                        <div class="section-title">Upload Video</div>
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-success-badge" id="uploadSuccessBadge" style="display: none;">✔</div>
+                            <div class="upload-content" id="uploadContent">
+                                <div class="upload-icon">⬆️</div>
+                                <div class="upload-title">Click, drop, or paste files to upload</div>
+                                <div class="upload-subtitle">Up to 8 files can be uploaded at a time</div>
+                                <button class="upload-btn-small" onclick="document.getElementById('fileInput').click()">
+                                    Choose Files
+                                </button>
+                                <input type="file" id="fileInput" class="file-input" accept=".mp4,.mov,.m4v,.3gp,.avi" onchange="handleFileSelect(event)">
+                            </div>
+                            <!-- 文件预览将在这里显示 -->
+                            <div class="file-preview" id="filePreview" style="display: none;">
+                                <div class="file-preview-item">
+                                    <video id="previewVideo" controls></video>
+                                </div>
+                                <div class="file-info">
+                                    <span id="fileName">No file selected</span>
+                                    <button class="remove-file" onclick="removeFile()">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="supported-formats">
+                            Support format: .mp4, .mov, .m4v, .3gp, .avi</div>
+                    </div>
+                </div>
+
+                <!-- 右侧：设置和选项 -->
+                <div class="workspace-right">
+                    <!-- 背景选择设置 -->
+                    <div class="settings-container">
+                        <div class="section-title">Background Options</div>
+                        
+                        <!-- 背景选择 -->
+                        <div class="background-options">
+                            <label class="bg-option">
+                                <input type="radio" name="background" value="green" checked onchange="handleBackgroundChange()">
+                                <div class="bg-content">
+                                    <div class="bg-icon green"></div>
+                                    <span class="bg-title">Green</span>
+                                </div>
+                            </label>
+                            <label class="bg-option">
+                                <input type="radio" name="background" value="transparent" onchange="handleBackgroundChange()">
+                                <div class="bg-content">
+                                    <div class="bg-icon transparent"></div>
+                                    <span class="bg-title">Transparent</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div style="padding: 15px; background: #f8f9fb; border-radius: 8px; margin-top: 10px;">
+                            <div style="font-size: 13px; color: #64748b; line-height: 1.5;">
+                                <strong>Test Mode:</strong> Processing test_video copy 2.mp4
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="actions-container">
+                        <button class="action-btn btn-process" id="processBtn" onclick="startProcessing()">
+                            <span class="btn-icon">🎬</span>
+                            <span id="btnText">Remove Background</span>
+                        </button>
+                        <button class="action-btn btn-preview" id="previewBtn" style="display: none;" onclick="downloadPreview()">
+                            <span class="btn-icon">👁️</span>
+                            Download 5s Preview Video
+                            <span style="font-size: 12px; opacity: 0.8;">(Free!)</span>
+                        </button>
+                        <button class="action-btn btn-download" id="downloadBtn" style="display: none;" onclick="downloadFull()">
+                            <span class="btn-icon">⬇️</span>
+                            Download Full Video
+                            <span style="font-size: 12px; opacity: 0.8;">(Pro)</span>
+                        </button>
+                        <div class="process-info" id="processInfo" style="display: none;">
+                            <div class="process-status">
+                                <div class="status-icon">⏳</div>
+                                <div class="status-text">Processing your video...</div>
+                                <div class="status-percent" id="processPercent">0%</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="process-details">
+                                <small>Analyzing frames • Removing background • Applying effects</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结果对比区域 -->
+            <div class="comparison-section" id="comparisonSection">
+                <div class="comparison-header">
+                    <h2 class="comparison-title">Video Comparison</h2>
+                </div>
+                <div class="comparison-container">
+                    <!-- 原始视频 -->
+                    <div class="comparison-item">
+                        <div class="comparison-label">
+                            <span class="label-badge original">Original</span>
+                            <span class="label-info" id="originalInfo">Original Video</span>
+                        </div>
+                        <div class="canvas-wrapper">
+                            <canvas id="originalCanvas" width="640" height="480"></canvas>
+                            <div class="video-controls" id="originalControls" style="display: none;">
+                                <button class="control-btn" onclick="togglePlay('original')">▶️</button>
+                                <span class="preview-time">5s Preview</span>
+                            </div>
+                            <div class="upload-placeholder" id="originalPlaceholder">
+                                <div class="placeholder-info">
+                                    <span class="placeholder-icon">📂</span>
+                                    <p>To be uploaded</p>
+                                    <small>Upload a video to begin</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 处理后的视频 -->
+                    <div class="comparison-item">
+                        <div class="comparison-label">
+                            <span class="label-badge processed">After</span>
+                            <span class="label-info" id="processedInfo">Background Removed</span>
+                        </div>
+                        <div class="canvas-wrapper">
+                            <canvas id="processedCanvas" width="640" height="480"></canvas>
+                            <div class="video-controls" id="processedControls" style="display: none;">
+                                <button class="control-btn" onclick="togglePlay('processed')">▶️</button>
+                                <span class="preview-time">5s Preview</span>
+                            </div>
+                            <div class="process-placeholder" id="processedPlaceholder">
+                                <div class="placeholder-info">
+                                    <span class="placeholder-icon">⏳</span>
+                                    <p>To be processed</p>
+                                    <small>Click Remove Background to begin</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 全局变量
+        let currentFile = null;
+        let isProcessed = false;
+        let processingComplete = false;
+        let backgroundMode = 'green';
+        let originalVideo = null;
+        let processedVideo = null;
+        let animationId = null;
+        let isPlaying = false;
+
+        // Canvas相关变量
+        let originalCtx = null;
+        let processedCtx = null;
+
+        // 初始化Canvas
+        window.onload = function() {
+            const originalCanvas = document.getElementById('originalCanvas');
+            const processedCanvas = document.getElementById('processedCanvas');
+            originalCtx = originalCanvas.getContext('2d');
+            processedCtx = processedCanvas.getContext('2d');
+            
+            // 设置Canvas默认背景
+            originalCtx.fillStyle = '#000';
+            originalCtx.fillRect(0, 0, originalCanvas.width, originalCanvas.height);
+            processedCtx.fillStyle = '#000';
+            processedCtx.fillRect(0, 0, processedCanvas.width, processedCanvas.height);
+        };
+
+        // 文件拖拽功能
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (!currentFile) {
+                uploadArea.classList.add('dragover');
+            }
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (!currentFile) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+
+        // 处理文件选择
+        function handleFileSelect(event) {
+            handleFiles(event.target.files);
+        }
+
+        // 处理文件
+        function handleFiles(files) {
+            if (files.length > 0) {
+                // 检查文件大小
+                if (files[0].size > 500 * 1024 * 1024) {
+                    alert('File size exceeds 500MB limit');
+                    return;
+                }
+
+                // 保存文件并显示预览
+                currentFile = files[0];
+                displayPreview(currentFile);
+                
+                // 延迟显示成功标记，模拟上传过程
+                setTimeout(() => {
+                    showUploadSuccess();
+                    showVideoInCanvas();
+                    resetProcessingState();
+                }, 500);
+            }
+        }
+
+        // 显示上传成功标记
+        function showUploadSuccess() {
+            const badge = document.getElementById('uploadSuccessBadge');
+            const uploadArea = document.getElementById('uploadArea');
+            badge.style.display = 'flex';
+            uploadArea.classList.add('has-file');
+        }
+
+        // 显示预览
+        function displayPreview(file) {
+            const filePreview = document.getElementById('filePreview');
+            const uploadContent = document.getElementById('uploadContent');
+            const previewVideo = document.getElementById('previewVideo');
+            const fileName = document.getElementById('fileName');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadContent.style.display = 'none';
+                filePreview.style.display = 'block';
+                fileName.textContent = file.name;
+                previewVideo.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 在Canvas中显示视频
+        function showVideoInCanvas() {
+            // 隐藏占位符
+            document.getElementById('originalPlaceholder').style.display = 'none';
+            
+            // 更新右侧为待处理状态
+            document.getElementById('processedPlaceholder').style.display = 'flex';
+            document.getElementById('processedPlaceholder').innerHTML = `
+                <div class="placeholder-info">
+                    <span class="placeholder-icon">⏳</span>
+                    <p>Ready to process</p>
+                    <small>Click Remove Background to begin</small>
+                </div>
+            `;
+            
+            // 创建视频元素并在Canvas中显示
+            originalVideo = document.createElement('video');
+            originalVideo.src = document.getElementById('previewVideo').src;
+            originalVideo.muted = true;
+            originalVideo.loop = true;
+            
+            originalVideo.onloadedmetadata = function() {
+                // 调整Canvas尺寸以适应视频
+                const originalCanvas = document.getElementById('originalCanvas');
+                const aspectRatio = originalVideo.videoWidth / originalVideo.videoHeight;
+                
+                if (aspectRatio > 1.33) {
+                    originalCanvas.width = 640;
+                    originalCanvas.height = Math.round(640 / aspectRatio);
+                } else {
+                    originalCanvas.height = 480;
+                    originalCanvas.width = Math.round(480 * aspectRatio);
+                }
+                
+                // 绘制第一帧
+                originalCtx.drawImage(originalVideo, 0, 0, originalCanvas.width, originalCanvas.height);
+                
+                // 显示控制按钮
+                document.getElementById('originalControls').style.display = 'flex';
+            };
+        }
+
+        // 移除文件
+        function removeFile() {
+            document.getElementById('uploadContent').style.display = 'block';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('previewVideo').src = '';
+            document.getElementById('uploadSuccessBadge').style.display = 'none';
+            document.getElementById('uploadArea').classList.remove('has-file');
+            
+            // 重置Canvas和视频
+            if (originalVideo) {
+                originalVideo.pause();
+                originalVideo = null;
+            }
+            if (processedVideo) {
+                processedVideo = null;
+            }
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            // 重置对比区域到初始状态
+            resetComparisonToInitial();
+            
+            currentFile = null;
+            resetProcessingState();
+        }
+
+        // 重置对比区域到初始状态
+        function resetComparisonToInitial() {
+            // 显示占位符
+            document.getElementById('originalPlaceholder').style.display = 'flex';
+            document.getElementById('processedPlaceholder').style.display = 'flex';
+            
+            // 隐藏控制按钮
+            document.getElementById('originalControls').style.display = 'none';
+            document.getElementById('processedControls').style.display = 'none';
+            
+            // 清空Canvas
+            const originalCanvas = document.getElementById('originalCanvas');
+            const processedCanvas = document.getElementById('processedCanvas');
+            originalCtx.fillStyle = '#000';
+            originalCtx.fillRect(0, 0, originalCanvas.width, originalCanvas.height);
+            processedCtx.fillStyle = '#000';
+            processedCtx.fillRect(0, 0, processedCanvas.width, processedCanvas.height);
+            
+            // 重置信息文本
+            document.getElementById('originalInfo').textContent = 'Original Video';
+            document.getElementById('processedInfo').textContent = 'Background Removed';
+        }
+
+        // 处理背景模式更改
+        function handleBackgroundChange() {
+            backgroundMode = document.querySelector('input[name="background"]:checked').value;
+            console.log('Background mode changed to:', backgroundMode);
+            
+            // 如果已经处理完成，需要重新处理
+            if (processingComplete) {
+                resetToReprocess();
+            }
+        }
+
+        // 重置为需要重新处理状态
+        function resetToReprocess() {
+            const processBtn = document.getElementById('processBtn');
+            const previewBtn = document.getElementById('previewBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const btnText = document.getElementById('btnText');
+            
+            processBtn.style.display = 'block';
+            previewBtn.style.display = 'none';
+            downloadBtn.style.display = 'none';
+            btnText.textContent = 'Reprocess Video';
+            
+            // 重置右侧为待处理状态
+            document.getElementById('processedPlaceholder').style.display = 'flex';
+            document.getElementById('processedPlaceholder').innerHTML = `
+                <div class="placeholder-info">
+                    <span class="placeholder-icon">🔄</span>
+                    <p>Settings changed</p>
+                    <small>Click Reprocess to apply new background</small>
+                </div>
+            `;
+            
+            // 隐藏处理后的控制按钮
+            document.getElementById('processedControls').style.display = 'none';
+            
+            processingComplete = false;
+        }
+
+        // 重置处理状态
+        function resetProcessingState() {
+            const processBtn = document.getElementById('processBtn');
+            const previewBtn = document.getElementById('previewBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const btnText = document.getElementById('btnText');
+            const processInfo = document.getElementById('processInfo');
+            
+            processBtn.style.display = 'block';
+            processBtn.disabled = false;
+            previewBtn.style.display = 'none';
+            downloadBtn.style.display = 'none';
+            btnText.textContent = 'Remove Background';
+            processInfo.style.display = 'none';
+            
+            processingComplete = false;
+        }
+
+        // 开始处理
+        function startProcessing() {
+            const processBtn = document.getElementById('processBtn');
+            const previewBtn = document.getElementById('previewBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const processInfo = document.getElementById('processInfo');
+            const progressFill = document.getElementById('progressFill');
+            const processPercent = document.getElementById('processPercent');
+
+            // 检查是否有文件
+            if (!currentFile && document.getElementById('filePreview').style.display === 'none') {
+                alert('Please upload a video first');
+                return;
+            }
+
+            // 显示处理状态
+            processBtn.disabled = true;
+            processInfo.style.display = 'block';
+
+            // 模拟处理进度
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    // 处理完成
+                    setTimeout(() => {
+                        processBtn.style.display = 'none';
+                        previewBtn.style.display = 'block';
+                        downloadBtn.style.display = 'block';
+                        processInfo.innerHTML = `
+                            <div style="text-align: center; padding: 20px;">
+                                <div style="font-size: 48px; margin-bottom: 10px;">✅</div>
+                                <div style="font-size: 16px; color: #10b981; font-weight: 600;">Background Removed Successfully!</div>
+                                <div style="font-size: 14px; color: #64748b; margin-top: 5px;">Your video is ready for download</div>
+                            </div>
+                        `;
+                        
+                        processingComplete = true;
+                        showProcessedResult();
+                    }, 500);
+                }
+                progressFill.style.width = progress + '%';
+                processPercent.textContent = Math.round(progress) + '%';
+            }, 200);
+        }
+
+        // 显示处理后的结果
+        function showProcessedResult() {
+            const backgroundText = backgroundMode === 'green' ? 'Green Screen' : 'Transparent';
+            document.getElementById('processedInfo').textContent = backgroundText + ' Applied';
+            
+            // 隐藏占位符
+            document.getElementById('processedPlaceholder').style.display = 'none';
+            
+            // 显示处理后的控制按钮
+            document.getElementById('processedControls').style.display = 'flex';
+            
+            // 复制原始Canvas尺寸到处理后的Canvas
+            const originalCanvas = document.getElementById('originalCanvas');
+            const processedCanvas = document.getElementById('processedCanvas');
+            processedCanvas.width = originalCanvas.width;
+            processedCanvas.height = originalCanvas.height;
+            
+            // 创建处理后的视频效果
+            processedVideo = true;
+            
+            // 绘制处理后的第一帧
+            if (originalVideo) {
+                drawProcessedFrame();
+            }
+        }
+
+        // 绘制处理后的帧（应用背景移除效果）
+        function drawProcessedFrame() {
+            const processedCanvas = document.getElementById('processedCanvas');
+            const width = processedCanvas.width;
+            const height = processedCanvas.height;
+            
+            // 清空Canvas
+            processedCtx.clearRect(0, 0, width, height);
+            
+            // 根据背景模式绘制背景
+            if (backgroundMode === 'green') {
+                // 绿色背景
+                processedCtx.fillStyle = '#00ff00';
+                processedCtx.fillRect(0, 0, width, height);
+            } else {
+                // 透明背景（棋盘格）
+                const blockSize = 20;
+                for (let y = 0; y < height; y += blockSize) {
+                    for (let x = 0; x < width; x += blockSize) {
+                        processedCtx.fillStyle = (Math.floor(x / blockSize) + Math.floor(y / blockSize)) % 2 === 0 
+                            ? '#e2e8f0' : '#cbd5e1';
+                        processedCtx.fillRect(x, y, blockSize, blockSize);
+                    }
+                }
+            }
+            
+            // 绘制处理后的视频（模拟背景移除）
+            if (originalVideo && originalVideo.readyState >= 2) {
+                // 创建临时Canvas进行图像处理
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = width;
+                tempCanvas.height = height;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // 绘制原始视频帧
+                tempCtx.drawImage(originalVideo, 0, 0, width, height);
+                
+                // 获取图像数据进行简单的背景移除模拟
+                const imageData = tempCtx.getImageData(0, 0, width, height);
+                const data = imageData.data;
+                
+                // 简单的绿幕效果模拟（基于颜色阈值）
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    
+                    // 简单的背景检测（这里假设灰色背景）
+                    const brightness = (r + g + b) / 3;
+                    if (brightness > 180 && brightness < 220) {
+                        // 将背景像素设为透明
+                        data[i + 3] = 0;
+                    }
+                }
+                
+                // 将处理后的图像绘制到Canvas
+                tempCtx.putImageData(imageData, 0, 0);
+                processedCtx.drawImage(tempCanvas, 0, 0);
+            }
+        }
+
+        // 播放/暂停控制
+        function togglePlay(type) {
+            if (type === 'original' && originalVideo) {
+                if (originalVideo.paused) {
+                    originalVideo.play();
+                    startAnimation();
+                } else {
+                    originalVideo.pause();
+                    stopAnimation();
+                }
+            } else if (type === 'processed' && processedVideo && originalVideo) {
+                if (originalVideo.paused) {
+                    originalVideo.play();
+                    startAnimation();
+                } else {
+                    originalVideo.pause();
+                    stopAnimation();
+                }
+            }
+        }
+
+        // 开始动画
+        function startAnimation() {
+            if (animationId) return;
+            
+            function animate() {
+                // 绘制原始视频帧
+                if (originalVideo && originalVideo.readyState >= 2) {
+                    const originalCanvas = document.getElementById('originalCanvas');
+                    originalCtx.drawImage(originalVideo, 0, 0, originalCanvas.width, originalCanvas.height);
+                }
+                
+                // 绘制处理后的视频帧
+                if (processedVideo) {
+                    drawProcessedFrame();
+                }
+                
+                // 限制预览时长为5秒
+                if (originalVideo && originalVideo.currentTime >= 5) {
+                    originalVideo.currentTime = 0;
+                }
+                
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        // 停止动画
+        function stopAnimation() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+
+        // 下载预览
+        function downloadPreview() {
+            alert('Downloading 5s preview video...');
+            // 实际应用中，这里实现预览视频的下载逻辑
+        }
+
+        // 下载完整视频
+        function downloadFull() {
+            alert('Downloading full video (Pro feature)...');
+            // 实际应用中，这里实现完整视频的下载逻辑
+        }
+    </script>
+</body>
+</html>

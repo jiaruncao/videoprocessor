@@ -1,0 +1,146 @@
+Noise Reducer Vue2 组件说明文档
+📋 项目概述
+Noise Reducer 是一个基于 Vue2 + Element UI 的音频降噪处理组件，提供了完整的视频文件上传、AI降噪处理和结果对比展示功能。该组件完全复刻了原HTML页面的所有功能和样式。
+🎯 主要功能
+1. 文件上传
+
+拖拽上传：支持拖放文件到上传区域
+点击上传：点击按钮选择文件
+文件限制：最多支持8个文件同时上传
+格式支持：.mp4, .mov, .m4v, .3gp, .avi
+上传反馈：成功上传后显示绿色对勾标记
+
+2. 快速示例
+
+提供4种预设示例：Podcast、Meeting、Outdoor、Traffic
+一键加载示例文件进行测试
+
+3. 音频处理
+
+实时进度显示：处理过程中显示百分比进度
+处理动画：动态显示处理状态
+完成提示：处理完成后显示成功标记
+
+4. 结果对比
+
+并排对比：原始视频和处理后视频左右对比显示
+视频控制：支持播放、暂停、进度控制
+预览标记：处理后的视频显示"5s Preview"标签
+
+5. 下载功能
+
+免费预览：提供5秒预览版本下载
+完整版本：Pro会员可下载完整处理后的视频
+
+📦 依赖安装
+bash# 安装 Element UI
+npm install element-ui@2.15.14
+
+# 安装 Vue2
+npm install vue@2.6.14
+
+# 安装 Sass 支持
+npm install sass sass-loader@10 -D
+🚀 使用方法
+1. 在 main.js 中全局引入 Element UI
+javascriptimport Vue from 'vue'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+
+Vue.use(ElementUI)
+2. 在页面中使用组件
+vue<template>
+  <div id="app">
+    <noise-reducer />
+  </div>
+</template>
+
+<script>
+import NoiseReducer from '@/components/NoiseReducer.vue'
+
+export default {
+  name: 'App',
+  components: {
+    NoiseReducer
+  }
+}
+</script>
+3. 路由配置（如使用 Vue Router）
+javascriptconst routes = [
+  {
+    path: '/noise-reducer',
+    name: 'NoiseReducer',
+    component: () => import('@/components/NoiseReducer.vue')
+  }
+]
+📁 文件结构
+src/
+├── components/
+│   ├── NoiseReducer.vue      # 主组件文件
+│   └── NoiseReducer.scss     # 样式文件
+├── assets/
+│   └── samples/               # 示例视频文件夹
+│       ├── podcast.mp4
+│       ├── meeting.mp4
+│       ├── outdoor.mp4
+│       └── traffic.mp4
+└── main.js                    # 应用入口文件
+🎨 样式定制
+主题颜色
+组件使用了以下主题颜色，可以通过修改 SCSS 变量进行定制：
+scss$primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+$success-color: #10b981;
+$danger-color: #ef4444;
+$background-color: #f8f9fb;
+$sidebar-bg: #1a1d23;
+🔧 组件配置
+Props（可扩展）
+目前组件未暴露 props，但可以根据需要添加：
+javascriptprops: {
+  maxFiles: {
+    type: Number,
+    default: 8
+  },
+  acceptFormats: {
+    type: String,
+    default: '.mp4,.mov,.m4v,.3gp,.avi'
+  },
+  userType: {
+    type: String,
+    default: 'pro' // 'free' or 'pro'
+  }
+}
+Events（可扩展）
+组件可以发出以下事件：
+javascript// 文件上传成功
+this.$emit('upload-success', file)
+
+// 处理完成
+this.$emit('process-complete', result)
+
+// 下载触发
+this.$emit('download', type) // 'preview' or 'full'
+📱 响应式设计
+组件包含完整的响应式设计：
+
+桌面端 (>1200px)：完整布局，侧边栏 + 双列工作区
+平板端 (768-1200px)：单列布局，保留侧边栏
+移动端 (<768px)：隐藏侧边栏，简化布局
+
+⚠️ 注意事项
+
+文件大小限制：建议在实际使用中添加文件大小限制
+视频格式兼容：确保服务器支持所有声明的视频格式
+浏览器兼容性：组件使用了现代CSS特性，需要较新版本浏览器支持
+API集成：示例中的处理过程是模拟的，需要替换为实际的API调用
+
+🔄 后续优化建议
+
+添加 Vuex 状态管理：管理文件列表和处理状态
+实现真实的视频处理：集成后端API
+添加批量处理：支持多文件队列处理
+优化大文件上传：实现分片上传
+添加更多音频设置：如降噪强度、音频格式等选项
+
+📞 技术支持
+如有问题或需要定制开发，请联系技术支持团队。

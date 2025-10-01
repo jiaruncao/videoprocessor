@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogger Monitor & Video Downloader - User Dashboard</title>
+    <style>
+        /* 全局样式 - 复用自watermark-remover.html */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* 侧边栏样式 - 复用自watermark-remover.html */
+        .sidebar {
+            width: 260px;
+            background: #1a1d23;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px;
+        }
+
+        .logo::before {
+            content: '🎬';
+            font-size: 30px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #8b92a5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 70%;
+            background: white;
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* 主内容区域 - 复用自watermark-remover.html */
+        .main-container {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #f8f9fb;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 标题区域 - 复用自watermark-remover.html */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        /* 平台监控区域 */
+        .platform-sections {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .platform-monitor-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .platform-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .platform-icon-large {
+            font-size: 28px;
+        }
+
+        .platform-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        /* 博主输入区域 */
+        .blogger-input-area {
+            margin-bottom: 15px;
+        }
+
+        .input-with-button {
+            display: flex;
+            gap: 10px;
+        }
+
+        .text-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .add-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+        }
+
+        .input-hint {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+        /* 监控列表 */
+        .monitored-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 15px;
+        }
+
+        .monitored-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f8f9fb;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .monitored-item:hover {
+            background: #f1f3ff;
+            transform: translateX(3px);
+        }
+
+        .monitored-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .monitored-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .monitored-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #16a34a;
+            border: 1px solid #86efac;
+        }
+
+        .status-checking {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #d97706;
+            border: 1px solid #fcd34d;
+        }
+
+        .status-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+
+        /* 更新日志区域 */
+        .updates-log-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .log-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .log-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .log-filter {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-color: #6366f1;
+        }
+
+        .log-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .log-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: #fafbfc;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .log-item:hover {
+            background: #f1f3ff;
+            border-left-color: #6366f1;
+        }
+
+        .log-time {
+            font-size: 12px;
+            color: #94a3b8;
+            min-width: 80px;
+            padding-top: 2px;
+        }
+
+        .log-content {
+            flex: 1;
+        }
+
+        .log-platform-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: white;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        .log-message {
+            font-size: 14px;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .log-link {
+            font-size: 12px;
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .log-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 下载区域 */
+        .download-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+        }
+
+        .download-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .download-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .download-subtitle {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .download-input-wrapper {
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .download-btn {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+        }
+
+        .download-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.35);
+        }
+
+        .download-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 支持的平台标签 */
+        .supported-platforms {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .platform-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .platform-tag-icon {
+            font-size: 16px;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* 处理状态 */
+        .process-status {
+            padding: 20px;
+            background: #f8f9fb;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .process-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .process-text {
+            font-size: 16px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        /* 成功消息 */
+        .success-message {
+            padding: 16px;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            color: #16a34a;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 响应式设计 - 复用自watermark-remover.html */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .platform-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-container {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .url-input-group {
+                flex-direction: column;
+            }
+
+            .download-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .log-filter {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="logo">MediaEnhance Pro</div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <span>📊</span> Dashboard
+                </li>
+                <li class="nav-item">
+                    <span>✨</span> Video/Image Enhancer
+                </li>
+                <li class="nav-item">
+                    <span>🧹</span> Watermark Remover
+                </li>
+                <li class="nav-item active">
+                    <span>📡</span> Blogger Monitor
+                </li>
+                <li class="nav-item">
+                    <span>🎨</span> Style Transfer
+                </li>
+                <li class="nav-item">
+                    <span>📁</span> My Projects
+                </li>
+                <li class="nav-item">
+                    <span>⚙️</span> Settings
+                </li>
+            </ul>
+        </nav>
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: auto;">
+            <div class="nav-item" style="background: rgba(255,255,255,0.05); padding: 12px 18px;">
+                <span>👤</span>
+                <div style="flex: 1;">
+                    <div style="color: white; font-size: 14px; font-weight: 600;">User Account</div>
+                    <div style="color: #8b92a5; font-size: 12px; margin-top: 2px;">Pro Plan</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-container">
+        <div class="content-wrapper">
+            <!-- 标题区域 -->
+            <div class="header">
+                <h1>Blogger Monitor & Video Downloader</h1>
+                <p>Track your favorite content creators across multiple platforms and download their videos without watermarks. Stay updated with real-time notifications when new content is posted.</p>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-icon">👥</span>
+                    <div class="stat-value" id="bloggerCount">8</div>
+                    <div class="stat-label">Monitored Bloggers</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">🔔</span>
+                    <div class="stat-value" id="updateCount">12</div>
+                    <div class="stat-label">New Updates Today</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">📱</span>
+                    <div class="stat-value" id="platformCount">4</div>
+                    <div class="stat-label">Active Platforms</div>
+                </div>
+            </div>
+
+            <!-- 平台监控区域 -->
+            <div class="platform-sections">
+                <!-- TikTok 监控 -->
+                <div class="platform-monitor-container">
+                    <div class="platform-header">
+                        <span class="platform-icon-large">🎵</span>
+                        <span class="platform-name">TikTok</span>
+                    </div>
+                    
+                    <div class="blogger-input-area">
+                        <div class="input-with-button">
+                            <input type="text" class="text-input" id="tiktokInput" 
+                                placeholder="Enter @username or profile link">
+                            <button class="add-btn" onclick="addBlogger('tiktok')">Add</button>
+                        </div>
+                        <div class="input-hint">Example: @charlidamelio or https://www.tiktok.com/@username</div>
+                    </div>
+
+                    <div class="monitored-list" id="tiktokList">
+                        <div class="monitored-item">
+                            <div class="monitored-info">
+                                <span class="monitored-name">@trendy_creator</span>
+                            </div>
+                            <div class="monitored-status status-active">
+                                <span class="status-dot"></span>
+                                <span>Active</span>
+                            </div>
+                            <button class="remove-btn" onclick="removeBlogger(this)">Remove</button>
+                        </div>
+                        <div class="monitored-item">
+                            <div class="monitored-info">
+                                <span class="monitored-name">@fashionista</span>
+                            </div>
+                            <div class="monitored-status status-checking">
+                                <span class="status-dot"></span>
+                                <span>Checking</span>
+                            </div>
+                            <button class="remove-btn" onclick="removeBlogger(this)">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Douyin 监控 -->
+                <div class="platform-monitor-container">
+                    <div class="platform-header">
+                        <span class="platform-icon-large">🎭</span>
+                        <span class="platform-name">Douyin</span>
+                    </div>
+                    
+                    <div class="blogger-input-area">
+                        <div class="input-with-button">
+                            <input type="text" class="text-input" id="douyinInput" 
+                                placeholder="Enter username or profile link">
+                            <button class="add-btn" onclick="addBlogger('douyin')">Add</button>
+                        </div>
+                        <div class="input-hint">Example: 美食达人 or Douyin profile URL</div>
+                    </div>
+
+                    <div class="monitored-list" id="douyinList">
+                        <div class="monitored-item">
+                            <div class="monitored-info">
+                                <span class="monitored-name">美食达人</span>
+                            </div>
+                            <div class="monitored-status status-active">
+                                <span class="status-dot"></span>
+                                <span>Active</span>
+                            </div>
+                            <button class="remove-btn" onclick="removeBlogger(this)">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instagram 监控 -->
+                <div class="platform-monitor-container">
+                    <div class="platform-header">
+                        <span class="platform-icon-large">📷</span>
+                        <span class="platform-name">Instagram</span>
+                    </div>
+                    
+                    <div class="blogger-input-area">
+                        <div class="input-with-button">
+                            <input type="text" class="text-input" id="instagramInput" 
+                                placeholder="Enter @username or profile link">
+                            <button class="add-btn" onclick="addBlogger('instagram')">Add</button>
+                        </div>
+                        <div class="input-hint">Example: @cristiano or https://www.instagram.com/username</div>
+                    </div>
+
+                    <div class="monitored-list" id="instagramList">
+                        <div class="monitored-item">
+                            <div class="monitored-info">
+                                <span class="monitored-name">@photography_pro</span>
+                            </div>
+                            <div class="monitored-status status-active">
+                                <span class="status-dot"></span>
+                                <span>Active</span>
+                            </div>
+                            <button class="remove-btn" onclick="removeBlogger(this)">Remove</button>
+                        </div>
+                        <div class="monitored-item">
+                            <div class="monitored-info">
+                                <span class="monitored-name">@travel_diary</span>
+                            </div>
+                            <div class="monitored-status status-active">
+                                <span class="status-dot"></span>
+                                <span>Active</span>
+                            </div>
+                            <button class="remove-btn" onclick="removeBlogger(this)">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- YouTube 监控 -->
+                <div class="platform-monitor-container">
+                    <div class="platform-header">
+                        <span class="platform-icon-large">📺</span>
+                        <span class="platform-name">YouTube</span>
+                    </div>
+                    
+                    <div class="blogger-input-area">
+                        <div class="input-with-button">
+                            <input type="text" class="text-input" id="youtubeInput" 
+                                placeholder="Enter @channel or channel link">
+                            <button class="add-btn" onclick="addBlogger('youtube')">Add</button>
+                        </div>
+                        <div class="input-hint">Example: @MrBeast or https://www.youtube.com/@channel</div>
+                    </div>
+
+                    <div class="monitored-list" id="youtubeList">
+                        <div class="monitored-item">
+                            <div class="monitored-info">
+                                <span class="monitored-name">TechReviews</span>
+                            </div>
+                            <div class="monitored-status status-active">
+                                <span class="status-dot"></span>
+                                <span>Active</span>
+                            </div>
+                            <button class="remove-btn" onclick="removeBlogger(this)">Remove</button>
+                        </div>
+                        <div class="monitored-item">
+                            <div class="monitored-info">
+                                <span class="monitored-name">GamingChannel</span>
+                            </div>
+                            <div class="monitored-status status-active">
+                                <span class="status-dot"></span>
+                                <span>Active</span>
+                            </div>
+                            <button class="remove-btn" onclick="removeBlogger(this)">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 更新日志区域 -->
+            <div class="updates-log-section">
+                <div class="log-header">
+                    <h2 class="log-title">📝 Recent Updates Log</h2>
+                    <div class="log-filter">
+                        <button class="filter-btn active" onclick="filterLog('all')">All</button>
+                        <button class="filter-btn" onclick="filterLog('tiktok')">TikTok</button>
+                        <button class="filter-btn" onclick="filterLog('douyin')">Douyin</button>
+                        <button class="filter-btn" onclick="filterLog('instagram')">Instagram</button>
+                        <button class="filter-btn" onclick="filterLog('youtube')">YouTube</button>
+                    </div>
+                </div>
+                
+                <div class="log-container" id="logContainer">
+                    <div class="log-item" data-platform="tiktok">
+                        <div class="log-time">10:32 AM</div>
+                        <div class="log-content">
+                            <span class="log-platform-badge">🎵 TikTok</span>
+                            <div class="log-message">
+                                <strong>@trendy_creator</strong> posted a new video: "Morning Routine 2025 ✨"
+                            </div>
+                            <a href="#" class="log-link">View Video →</a>
+                        </div>
+                    </div>
+                    
+                    <div class="log-item" data-platform="youtube">
+                        <div class="log-time">09:45 AM</div>
+                        <div class="log-content">
+                            <span class="log-platform-badge">📺 YouTube</span>
+                            <div class="log-message">
+                                <strong>TechReviews</strong> uploaded: "iPhone 16 Pro Max Unboxing & First Impressions"
+                            </div>
+                            <a href="#" class="log-link">View Video →</a>
+                        </div>
+                    </div>
+                    
+                    <div class="log-item" data-platform="instagram">
+                        <div class="log-time">09:20 AM</div>
+                        <div class="log-content">
+                            <span class="log-platform-badge">📷 Instagram</span>
+                            <div class="log-message">
+                                <strong>@photography_pro</strong> shared a new Reel: "Golden Hour Photography Tips"
+                            </div>
+                            <a href="#" class="log-link">View Reel →</a>
+                        </div>
+                    </div>
+                    
+                    <div class="log-item" data-platform="douyin">
+                        <div class="log-time">08:55 AM</div>
+                        <div class="log-content">
+                            <span class="log-platform-badge">🎭 Douyin</span>
+                            <div class="log-message">
+                                <strong>美食达人</strong> posted: "家常菜教程 - 红烧肉"
+                            </div>
+                            <a href="#" class="log-link">View Video →</a>
+                        </div>
+                    </div>
+                    
+                    <div class="log-item" data-platform="tiktok">
+                        <div class="log-time">08:30 AM</div>
+                        <div class="log-content">
+                            <span class="log-platform-badge">🎵 TikTok</span>
+                            <div class="log-message">
+                                <strong>@fashionista</strong> went live: "Fashion Q&A Session"
+                            </div>
+                            <a href="#" class="log-link">Watch Recording →</a>
+                        </div>
+                    </div>
+                    
+                    <div class="log-item" data-platform="youtube">
+                        <div class="log-time">Yesterday</div>
+                        <div class="log-content">
+                            <span class="log-platform-badge">📺 YouTube</span>
+                            <div class="log-message">
+                                <strong>GamingChannel</strong> premiered: "Cyberpunk 2077 - Full Walkthrough Part 1"
+                            </div>
+                            <a href="#" class="log-link">View Video →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 视频下载区域 -->
+            <div class="download-section">
+                <div class="download-header">
+                    <h2 class="download-title">Video Downloader</h2>
+                    <p class="download-subtitle">Download videos without watermarks from your favorite platforms</p>
+                </div>
+                
+                <div class="download-input-wrapper">
+                    <div class="url-input-group">
+                        <input 
+                            type="text" 
+                            class="url-input" 
+                            id="videoUrl" 
+                            placeholder="Paste video URL here (TikTok, Douyin, Instagram, YouTube, etc.)"
+                        >
+                        <button class="download-btn" id="downloadVideoBtn" onclick="downloadVideo()">
+                            <span>⬇️</span>
+                            <span>Download</span>
+                        </button>
+                    </div>
+                    
+                    <!-- 支持的平台 -->
+                    <div class="supported-platforms">
+                        <div class="platform-tag">
+                            <span class="platform-tag-icon">🎵</span>
+                            <span>TikTok</span>
+                        </div>
+                        <div class="platform-tag">
+                            <span class="platform-tag-icon">🎭</span>
+                            <span>Douyin</span>
+                        </div>
+                        <div class="platform-tag">
+                            <span class="platform-tag-icon">📷</span>
+                            <span>Instagram Reels</span>
+                        </div>
+                        <div class="platform-tag">
+                            <span class="platform-tag-icon">📺</span>
+                            <span>YouTube Shorts</span>
+                        </div>
+                        <div class="platform-tag">
+                            <span class="platform-tag-icon">📱</span>
+                            <span>Twitter/X</span>
+                        </div>
+                        <div class="platform-tag">
+                            <span class="platform-tag-icon">👻</span>
+                            <span>Snapchat</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 处理状态 -->
+                <div class="process-status" id="processStatus" style="display: none;">
+                    <div class="process-icon">⚙️</div>
+                    <div class="process-text">Processing video... Please wait</div>
+                </div>
+
+                <!-- 成功消息 -->
+                <div class="success-message" id="successMessage">
+                    <span>✅</span> Video downloaded successfully without watermark!
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 初始化统计
+        let stats = {
+            bloggers: 8,
+            updates: 12,
+            platforms: 4
+        };
+
+        // 更新统计显示
+        function updateStats() {
+            document.getElementById('bloggerCount').textContent = stats.bloggers;
+            document.getElementById('updateCount').textContent = stats.updates;
+            document.getElementById('platformCount').textContent = stats.platforms;
+        }
+
+        // 页面加载时初始化
+        window.onload = function() {
+            updateStats();
+            // 自动刷新日志
+            setInterval(checkForUpdates, 30000); // 每30秒检查一次更新
+        };
+
+        // 添加博主到特定平台
+        function addBlogger(platform) {
+            const input = document.getElementById(platform + 'Input');
+            const blogger = input.value.trim();
+            
+            if (!blogger) {
+                alert('Please enter a blogger ID or link');
+                return;
+            }
+            
+            const list = document.getElementById(platform + 'List');
+            
+            // 创建新的监控项
+            const item = document.createElement('div');
+            item.className = 'monitored-item';
+            item.style.animation = 'slideDown 0.3s ease';
+            
+            item.innerHTML = `
+                <div class="monitored-info">
+                    <span class="monitored-name">${blogger}</span>
+                </div>
+                <div class="monitored-status status-checking">
+                    <span class="status-dot"></span>
+                    <span>Checking</span>
+                </div>
+                <button class="remove-btn" onclick="removeBlogger(this)">Remove</button>
+            `;
+            
+            list.appendChild(item);
+            
+            // 模拟状态更新
+            setTimeout(() => {
+                const status = item.querySelector('.monitored-status');
+                status.className = 'monitored-status status-active';
+                status.innerHTML = '<span class="status-dot"></span><span>Active</span>';
+                
+                // 添加到日志
+                addLogEntry(platform, blogger);
+            }, 2000);
+            
+            // 更新统计
+            stats.bloggers++;
+            updateStats();
+            
+            // 清空输入
+            input.value = '';
+            
+            // 显示成功消息
+            showMessage('Blogger added successfully!');
+        }
+
+        // 添加日志条目
+        function addLogEntry(platform, blogger) {
+            const logContainer = document.getElementById('logContainer');
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            
+            const platformIcons = {
+                'tiktok': '🎵 TikTok',
+                'douyin': '🎭 Douyin',
+                'instagram': '📷 Instagram',
+                'youtube': '📺 YouTube'
+            };
+            
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item';
+            logItem.setAttribute('data-platform', platform);
+            logItem.style.animation = 'slideDown 0.3s ease';
+            
+            logItem.innerHTML = `
+                <div class="log-time">${time}</div>
+                <div class="log-content">
+                    <span class="log-platform-badge">${platformIcons[platform]}</span>
+                    <div class="log-message">
+                        <strong>${blogger}</strong> has been added to monitoring list
+                    </div>
+                    <a href="#" class="log-link">Check Profile →</a>
+                </div>
+            `;
+            
+            logContainer.insertBefore(logItem, logContainer.firstChild);
+            
+            // 更新统计
+            stats.updates++;
+            updateStats();
+        }
+
+        // 移除博主
+        function removeBlogger(btn) {
+            const item = btn.closest('.monitored-item');
+            item.style.animation = 'slideDown 0.3s ease reverse';
+            setTimeout(() => {
+                item.remove();
+                stats.bloggers--;
+                updateStats();
+            }, 300);
+        }
+
+        // 过滤日志
+        function filterLog(platform) {
+            const buttons = document.querySelectorAll('.filter-btn');
+            const logItems = document.querySelectorAll('.log-item');
+            
+            // 更新按钮状态
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(platform) || 
+                    (platform === 'all' && btn.textContent === 'All')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // 过滤日志项
+            logItems.forEach(item => {
+                if (platform === 'all') {
+                    item.style.display = 'flex';
+                } else {
+                    if (item.getAttribute('data-platform') === platform) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // 检查更新（模拟）
+        function checkForUpdates() {
+            // 随机生成新更新
+            const platforms = ['tiktok', 'douyin', 'instagram', 'youtube'];
+            const bloggers = ['@trendy_creator', '美食达人', '@photography_pro', 'TechReviews'];
+            
+            if (Math.random() > 0.5) {
+                const platform = platforms[Math.floor(Math.random() * platforms.length)];
+                const blogger = bloggers[Math.floor(Math.random() * bloggers.length)];
+                
+                addLogEntry(platform, blogger);
+                showMessage(`New update from ${blogger}!`);
+            }
+        }
+
+        // 下载视频
+        function downloadVideo() {
+            const urlInput = document.getElementById('videoUrl');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('Please enter a video URL');
+                return;
+            }
+            
+            // 验证URL格式
+            if (!url.startsWith('http')) {
+                alert('Please enter a valid URL');
+                return;
+            }
+            
+            const btn = document.getElementById('downloadVideoBtn');
+            const processStatus = document.getElementById('processStatus');
+            
+            // 显示处理状态
+            btn.disabled = true;
+            processStatus.style.display = 'block';
+            
+            // 模拟下载过程
+            setTimeout(() => {
+                // 隐藏处理状态
+                processStatus.style.display = 'none';
+                btn.disabled = false;
+                
+                // 显示成功消息
+                const successMsg = document.getElementById('successMessage');
+                successMsg.classList.add('show');
+                
+                // 清空输入
+                urlInput.value = '';
+                
+                // 3秒后隐藏成功消息
+                setTimeout(() => {
+                    successMsg.classList.remove('show');
+                }, 3000);
+                
+                // 模拟下载
+                console.log('Downloading video from:', url);
+            }, 2500);
+        }
+
+        // 显示临时消息
+        function showMessage(text) {
+            // 创建消息元素
+            const message = document.createElement('div');
+            message.className = 'success-message show';
+            message.style.position = 'fixed';
+            message.style.top = '20px';
+            message.style.right = '20px';
+            message.style.zIndex = '9999';
+            message.innerHTML = `<span>✅</span> ${text}`;
+            
+            document.body.appendChild(message);
+            
+            // 3秒后移除
+            setTimeout(() => {
+                message.remove();
+            }, 3000);
+        }
+
+        // 监听Enter键下载
+        document.getElementById('videoUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                downloadVideo();
+            }
+        });
+
+        // 监听各平台输入框的Enter键
+        ['tiktok', 'douyin', 'instagram', 'youtube'].forEach(platform => {
+            document.getElementById(platform + 'Input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addBlogger(platform);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
