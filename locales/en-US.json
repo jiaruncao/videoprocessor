@@ -10,15 +10,21 @@
     "brand": "MediaEnhance Pro",
     "user": {
       "account": "User Account",
-      "plan": "Free Plan"
+      "plan": "Free Plan",
+      "proMember": "Pro Member",
+      "proPlan": "Pro Plan"
     }
   },
   "menu": {
     "dashboard": "Dashboard",
     "videoEnhancer": "Video/Image Enhancer",
     "watermarkRemover": "Watermark Remover",
+    "backgroundRemover": "Background Remover",
     "styleTransfer": "Style Transfer",
     "audioEnhancement": "Audio Enhancement",
+    "audioToText": "Speech to Text",
+    "videoDeduplication": "Video Deduplication",
+    "noiseReducer": "Noise Reducer",
     "projects": "My Projects",
     "settings": "Settings"
   },
@@ -152,6 +158,338 @@
       "uploadRequired": "Please upload a file first",
       "success": "Watermark removed successfully!",
       "download": "Downloading clean media..."
+    }
+  },
+  "backgroundRemover": {
+    "header": {
+      "title": "Video Background Remover",
+      "subtitle": "Remove the background from your video and replace it with a green or transparent background with just one click."
+    },
+    "upload": {
+      "title": "Upload Video",
+      "instructions": "Click, drop, or paste files to upload",
+      "hint": "Up to 8 files can be uploaded at a time",
+      "button": "Choose Files",
+      "supported": "Support format: .mp4, .mov, .m4v, .3gp, .avi"
+    },
+    "settings": {
+      "title": "Background Options",
+      "options": {
+        "green": "Green",
+        "transparent": "Transparent"
+      },
+      "testModeLabel": "Test Mode:",
+      "testModeValue": "Processing test_video copy 2.mp4"
+    },
+    "actions": {
+      "remove": "Remove Background",
+      "reprocess": "Reprocess Video",
+      "preview": "Download 5s Preview Video",
+      "previewSubtitle": "(Free!)",
+      "download": "Download Full Video",
+      "downloadSubtitle": "(Pro)"
+    },
+    "processing": {
+      "inProgress": "Processing your video...",
+      "details": "Analyzing frames • Removing background • Applying effects",
+      "completeTitle": "Background Removed Successfully!",
+      "completeSubtitle": "Your video is ready for download"
+    },
+    "comparison": {
+      "title": "Video Comparison",
+      "original": "Original",
+      "processed": "After",
+      "previewLabel": "5s Preview",
+      "placeholderTitle": "To be uploaded",
+      "placeholderHint": "Upload a video to begin"
+    },
+    "status": {
+      "originalInfo": "Original Video",
+      "processedInitial": "Ready for background removal",
+      "processedGreen": "Green Screen Applied",
+      "processedTransparent": "Transparent Background",
+      "toBeProcessed": "To be processed",
+      "processHint": "Click Remove Background to begin",
+      "settingsChanged": "Settings changed",
+      "reprocessHint": "Click Reprocess to apply new background"
+    },
+    "messages": {
+      "uploadLimit": "Maximum 8 files allowed at once",
+      "fileTooLarge": "File size exceeds 500MB limit",
+      "uploadRequired": "Please upload a video first",
+      "downloadPreview": "Downloading 5s preview video...",
+      "downloadFull": "Downloading full video (Pro feature)..."
+    }
+  },
+  "audioToText": {
+    "header": {
+      "title": "Video & Audio to Text",
+      "subtitle": "Convert your video and audio files into accurate text transcriptions using advanced AI speech recognition technology. Support for multiple languages and export formats."
+    },
+    "upload": {
+      "title": "Upload Media",
+      "instructions": "Drop your media files here",
+      "hint": "or click to browse",
+      "button": "Choose Files",
+      "supported": "Supported: .mp4, .mov, .m4v, .mp3, .wav, .m4a, .aac (Max 8 files, 2GB total)"
+    },
+    "preview": {
+      "durationLabel": "Duration:"
+    },
+    "samples": {
+      "title": "Quick Samples",
+      "interview": "Interview Sample",
+      "podcast": "Podcast Sample",
+      "meeting": "Meeting Sample",
+      "lecture": "Lecture Sample"
+    },
+    "settings": {
+      "title": "Transcription Settings",
+      "languageDetection": "Language Detection",
+      "languagePlaceholder": "Select language",
+      "languages": {
+        "auto": "Auto-detect Language",
+        "en": "English",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German",
+        "zh": "Chinese (Mandarin)",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "ar": "Arabic",
+        "ru": "Russian",
+        "pt": "Portuguese"
+      },
+      "translationTitle": "Translation Options",
+      "enableTranslation": "Enable Translation",
+      "translateTo": "Translate to:",
+      "translationPlaceholder": "Select translation language",
+      "translation": {
+        "en": "English",
+        "zh": "Chinese (Simplified)",
+        "zhTw": "Chinese (Traditional)",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "ar": "Arabic",
+        "ru": "Russian",
+        "pt": "Portuguese",
+        "it": "Italian",
+        "nl": "Dutch",
+        "hi": "Hindi",
+        "th": "Thai"
+      },
+      "outputFormat": "Output Format",
+      "formats": {
+        "txt": "TXT",
+        "srt": "SRT"
+      }
+    },
+    "actions": {
+      "start": "Start Transcription",
+      "retry": "Retranscribe",
+      "download": "Download Transcript"
+    },
+    "processing": {
+      "inProgress": "Transcribing your media...",
+      "details": "Processing audio • Recognizing speech • Generating text",
+      "translatePrefix": "Translating to ",
+      "completeTitle": "Transcription Complete!",
+      "completeSubtitle": "Your transcript is ready for download"
+    },
+    "messages": {
+      "totalSizeLimit": "Total file size exceeds 2GB limit",
+      "languageConflict": "Source language and translation language cannot be the same",
+      "uploadRequired": "Please upload a file or select a sample first",
+      "downloading": "Downloading"
+    },
+    "languageNames": {
+      "en": "English",
+      "zh": "Chinese (Simplified)",
+      "zhTw": "Chinese (Traditional)",
+      "es": "Spanish",
+      "fr": "French",
+      "de": "German",
+      "ja": "Japanese",
+      "ko": "Korean",
+      "ar": "Arabic",
+      "ru": "Russian",
+      "pt": "Portuguese",
+      "it": "Italian",
+      "nl": "Dutch",
+      "hi": "Hindi",
+      "th": "Thai"
+    }
+  },
+  "videoDeduplication": {
+    "header": {
+      "title": "Smart Video Deduplication",
+      "subtitle": "AI-powered video deduplication with intelligent processing modes and advanced transformation options for professional content optimization."
+    },
+    "upload": {
+      "title": "Upload Videos",
+      "instructions": "Drop your videos here",
+      "hint": "or click to browse",
+      "button": "Choose Videos",
+      "supported": "Supported: MP4, MOV, M4V, 3GP, AVI, MKV, WebM (Max 500MB)",
+      "emptyTitle": "No file uploaded",
+      "emptyHint": "Upload a video to begin"
+    },
+    "actions": {
+      "start": "Start Processing",
+      "processing": "Processing...",
+      "download": "Download Processed Videos"
+    },
+    "processing": {
+      "inProgress": "Processing videos..."
+    },
+    "settings": {
+      "title": "Processing Mode",
+      "modes": {
+        "smart": {
+          "title": "Smart Mode",
+          "desc": "Optimized settings for best results"
+        },
+        "custom": {
+          "title": "Custom Mode",
+          "desc": "Fine-tune all parameters"
+        }
+      },
+      "basicTitle": "Basic Deduplication",
+      "specialTitle": "Special Effects",
+      "basic": {
+        "removeDuplicates": "Remove Duplicates",
+        "mirrorFlip": "Mirror Flip",
+        "randomShift": "Random Position Shift",
+        "modifyMd5": "Modify MD5 Hash",
+        "smartExtract": "Smart Frame Extraction",
+        "smartColor": "Smart Color Adjustment",
+        "sharpening": "Image Sharpening",
+        "randomSpeed": "Random Speed Variation",
+        "trimHeadTail": "Trim Head/Tail",
+        "randomMirror": "Random Mirror"
+      },
+      "effects": {
+        "scanline": "Scan Line",
+        "spotlight": "Spotlight",
+        "fade": "Fade",
+        "booklet": "Booklet",
+        "dissolve": "Dissolve",
+        "split": "Split Screen",
+        "product": "Product",
+        "film": "Film",
+        "drama": "Drama"
+      },
+      "zoomTitle": "Zoom Settings",
+      "zoom": {
+        "stretch": "Stretch",
+        "compress": "Compress",
+        "dynamic": "Dynamic"
+      }
+    },
+    "comparison": {
+      "title": "Before & After Comparison",
+      "original": "Original",
+      "processed": "Processed",
+      "processPlaceholderTitle": "Ready to process",
+      "processPlaceholderHint": "Click Start Processing to begin"
+    },
+    "statistics": {
+      "title": "Processing Complete",
+      "original": "Original Files",
+      "processed": "Processed",
+      "effects": "Effects Applied",
+      "success": "Success Rate"
+    },
+    "status": {
+      "originalInfo": "Before Processing",
+      "processedInfo": "After Deduplication",
+      "processedSmart": "Processed (Smart Mode)",
+      "processedCustom": "Processed (Custom Mode)"
+    },
+    "messages": {
+      "removePrefix": "Remove",
+      "confirmTitle": "Confirm",
+      "confirmYes": "Yes",
+      "confirmNo": "No",
+      "uploadRequired": "Please upload videos first",
+      "processedSuccess": "Processing completed successfully!",
+      "reportDownloaded": "Processing report downloaded successfully!"
+    }
+  },
+  "noiseReducer": {
+    "header": {
+      "title": "Noise Reducer",
+      "subtitle": "Remove background noise from videos with AI for clear, crisp sound. Ideal for podcasts, narration, and voiceovers."
+    },
+    "upload": {
+      "title": "Upload Media",
+      "instructions": "Click, drop, or paste files to upload",
+      "hint": "Up to 8 files can be uploaded at a time",
+      "button": "Choose Files",
+      "supported": "Support format: .mp4, .mov, .m4v, .3gp, .avi",
+      "noFile": "No file selected"
+    },
+    "samples": {
+      "title": "Quick Samples",
+      "podcast": {
+        "label": "Podcast",
+        "title": "Podcast Sample"
+      },
+      "meeting": {
+        "label": "Meeting",
+        "title": "Meeting Sample"
+      },
+      "outdoor": {
+        "label": "Outdoor",
+        "title": "Outdoor Sample"
+      },
+      "traffic": {
+        "label": "Traffic",
+        "title": "Traffic Sample"
+      }
+    },
+    "actions": {
+      "reduce": "Reduce Noise",
+      "processing": "Processing...",
+      "preview": "Download 5s Preview Video",
+      "previewSubtitle": "Free!",
+      "downloadFull": "Download Full Video",
+      "downloadFullSubtitle": "You are Pro member"
+    },
+    "processing": {
+      "inProgress": "Processing audio...",
+      "details": "Analyzing frequencies • Removing noise • Enhancing clarity",
+      "completeTitle": "Noise Reduction Complete!",
+      "completeSubtitle": "Your clean audio is ready",
+      "previewBadge": "5s Preview",
+      "placeholderProcessing": "Processing...",
+      "placeholderPending": "To be processed",
+      "placeholderWaitHint": "Please wait",
+      "placeholderStartHint": "Click Reduce Noise to begin"
+    },
+    "comparison": {
+      "title": "Audio Comparison",
+      "original": "Original",
+      "processed": "After",
+      "defaultFileName": "test_video copy 2.mp4",
+      "ready": "Ready to process"
+    },
+    "messages": {
+      "invalidFile": "Please upload video files only!",
+      "exceedLimit": "Maximum 8 files allowed at once",
+      "sampleLoaded": {
+        "podcast": "Loaded podcast sample",
+        "meeting": "Loaded meeting sample",
+        "outdoor": "Loaded outdoor sample",
+        "traffic": "Loaded traffic sample"
+      },
+      "uploadRequired": "Please upload a file first",
+      "processingComplete": "Noise reduction completed!",
+      "downloadPreview": "Downloading 5s preview video...",
+      "downloadFull": "Downloading full video..."
     }
   }
 }

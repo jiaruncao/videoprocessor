@@ -10,15 +10,21 @@
     "brand": "MediaEnhance Pro",
     "user": {
       "account": "用户账号",
-      "plan": "免费版"
+      "plan": "免费版",
+      "proMember": "专业会员",
+      "proPlan": "专业版"
     }
   },
   "menu": {
     "dashboard": "数据概览",
     "videoEnhancer": "视频/图像增强",
     "watermarkRemover": "水印去除",
+    "backgroundRemover": "背景去除",
     "styleTransfer": "风格迁移",
     "audioEnhancement": "音频增强",
+    "audioToText": "语音转文本",
+    "videoDeduplication": "视频去重",
+    "noiseReducer": "降噪处理",
     "projects": "我的项目",
     "settings": "设置"
   },
@@ -152,6 +158,338 @@
       "uploadRequired": "请先上传文件",
       "success": "水印去除成功！",
       "download": "正在下载净化后的文件..."
+    }
+  },
+  "backgroundRemover": {
+    "header": {
+      "title": "视频背景去除",
+      "subtitle": "只需一键即可移除视频背景并替换为绿幕或透明背景。"
+    },
+    "upload": {
+      "title": "上传视频",
+      "instructions": "点击、拖拽或粘贴文件上传",
+      "hint": "一次最多可上传 8 个文件",
+      "button": "选择文件",
+      "supported": "支持格式：.mp4、.mov、.m4v、.3gp、.avi"
+    },
+    "settings": {
+      "title": "背景选项",
+      "options": {
+        "green": "绿色",
+        "transparent": "透明"
+      },
+      "testModeLabel": "测试模式：",
+      "testModeValue": "正在处理 test_video copy 2.mp4"
+    },
+    "actions": {
+      "remove": "开始去除背景",
+      "reprocess": "重新处理视频",
+      "preview": "下载 5 秒预览视频",
+      "previewSubtitle": "（免费）",
+      "download": "下载完整视频",
+      "downloadSubtitle": "（专业版）"
+    },
+    "processing": {
+      "inProgress": "正在处理视频...",
+      "details": "分析画面 • 移除背景 • 应用效果",
+      "completeTitle": "背景已成功去除！",
+      "completeSubtitle": "视频已准备好下载"
+    },
+    "comparison": {
+      "title": "效果对比",
+      "original": "原始视频",
+      "processed": "处理结果",
+      "previewLabel": "5 秒预览",
+      "placeholderTitle": "等待上传",
+      "placeholderHint": "上传视频即可开始"
+    },
+    "status": {
+      "originalInfo": "原始视频",
+      "processedInitial": "等待背景处理",
+      "processedGreen": "已应用绿幕背景",
+      "processedTransparent": "已应用透明背景",
+      "toBeProcessed": "等待处理",
+      "processHint": "点击开始去除背景",
+      "settingsChanged": "设置已更新",
+      "reprocessHint": "点击重新处理以应用新背景"
+    },
+    "messages": {
+      "uploadLimit": "一次最多只能上传 8 个文件",
+      "fileTooLarge": "文件大小超过 500MB 限制",
+      "uploadRequired": "请先上传视频",
+      "downloadPreview": "正在下载 5 秒预览视频...",
+      "downloadFull": "正在下载完整视频（专业功能）..."
+    }
+  },
+  "audioToText": {
+    "header": {
+      "title": "音视频转文字",
+      "subtitle": "利用先进的语音识别技术，将您的音频和视频精准转写为文本，支持多语言与多种导出格式。"
+    },
+    "upload": {
+      "title": "上传素材",
+      "instructions": "将音视频拖拽到此处",
+      "hint": "或点击浏览",
+      "button": "选择文件",
+      "supported": "支持格式：.mp4、.mov、.m4v、.mp3、.wav、.m4a、.aac（最多 8 个文件，总大小 2GB）"
+    },
+    "preview": {
+      "durationLabel": "时长："
+    },
+    "samples": {
+      "title": "快速示例",
+      "interview": "访谈示例",
+      "podcast": "播客示例",
+      "meeting": "会议示例",
+      "lecture": "课程示例"
+    },
+    "settings": {
+      "title": "转写设置",
+      "languageDetection": "语言检测",
+      "languagePlaceholder": "请选择语言",
+      "languages": {
+        "auto": "自动检测语言",
+        "en": "英语",
+        "es": "西班牙语",
+        "fr": "法语",
+        "de": "德语",
+        "zh": "中文（普通话）",
+        "ja": "日语",
+        "ko": "韩语",
+        "ar": "阿拉伯语",
+        "ru": "俄语",
+        "pt": "葡萄牙语"
+      },
+      "translationTitle": "翻译选项",
+      "enableTranslation": "启用翻译",
+      "translateTo": "翻译为：",
+      "translationPlaceholder": "请选择翻译语言",
+      "translation": {
+        "en": "英语",
+        "zh": "中文（简体）",
+        "zhTw": "中文（繁体）",
+        "es": "西班牙语",
+        "fr": "法语",
+        "de": "德语",
+        "ja": "日语",
+        "ko": "韩语",
+        "ar": "阿拉伯语",
+        "ru": "俄语",
+        "pt": "葡萄牙语",
+        "it": "意大利语",
+        "nl": "荷兰语",
+        "hi": "印地语",
+        "th": "泰语"
+      },
+      "outputFormat": "输出格式",
+      "formats": {
+        "txt": "TXT",
+        "srt": "SRT"
+      }
+    },
+    "actions": {
+      "start": "开始转写",
+      "retry": "重新转写",
+      "download": "下载转写结果"
+    },
+    "processing": {
+      "inProgress": "正在转写...",
+      "details": "处理音频 • 识别语音 • 生成文本",
+      "translatePrefix": "翻译为 ",
+      "completeTitle": "转写完成！",
+      "completeSubtitle": "文本已准备好下载"
+    },
+    "messages": {
+      "totalSizeLimit": "文件总大小超过 2GB 限制",
+      "languageConflict": "源语言与翻译语言不能相同",
+      "uploadRequired": "请先上传文件或选择示例",
+      "downloading": "正在下载"
+    },
+    "languageNames": {
+      "en": "英语",
+      "zh": "中文（简体）",
+      "zhTw": "中文（繁体）",
+      "es": "西班牙语",
+      "fr": "法语",
+      "de": "德语",
+      "ja": "日语",
+      "ko": "韩语",
+      "ar": "阿拉伯语",
+      "ru": "俄语",
+      "pt": "葡萄牙语",
+      "it": "意大利语",
+      "nl": "荷兰语",
+      "hi": "印地语",
+      "th": "泰语"
+    }
+  },
+  "videoDeduplication": {
+    "header": {
+      "title": "智能视频去重",
+      "subtitle": "基于 AI 的视频去重，提供智能模式与高级参数调节，助力专业内容优化。"
+    },
+    "upload": {
+      "title": "上传视频",
+      "instructions": "将视频拖拽到此处",
+      "hint": "或点击浏览",
+      "button": "选择视频",
+      "supported": "支持格式：MP4、MOV、M4V、3GP、AVI、MKV、WebM（最大 500MB）",
+      "emptyTitle": "尚未上传文件",
+      "emptyHint": "上传视频即可开始"
+    },
+    "actions": {
+      "start": "开始处理",
+      "processing": "处理中...",
+      "download": "下载处理结果"
+    },
+    "processing": {
+      "inProgress": "正在处理视频..."
+    },
+    "settings": {
+      "title": "处理模式",
+      "modes": {
+        "smart": {
+          "title": "智能模式",
+          "desc": "预设最佳效果"
+        },
+        "custom": {
+          "title": "自定义模式",
+          "desc": "全面掌控所有参数"
+        }
+      },
+      "basicTitle": "基础去重",
+      "specialTitle": "特效处理",
+      "basic": {
+        "removeDuplicates": "去除重复",
+        "mirrorFlip": "镜像翻转",
+        "randomShift": "随机位置偏移",
+        "modifyMd5": "修改 MD5 指纹",
+        "smartExtract": "智能抽帧",
+        "smartColor": "智能调色",
+        "sharpening": "图像锐化",
+        "randomSpeed": "随机变速",
+        "trimHeadTail": "裁剪片头片尾",
+        "randomMirror": "随机镜像"
+      },
+      "effects": {
+        "scanline": "扫描线",
+        "spotlight": "聚光灯",
+        "fade": "淡入淡出",
+        "booklet": "书页翻转",
+        "dissolve": "溶解",
+        "split": "分屏",
+        "product": "商品展示",
+        "film": "胶片",
+        "drama": "戏剧"
+      },
+      "zoomTitle": "缩放设置",
+      "zoom": {
+        "stretch": "拉伸",
+        "compress": "压缩",
+        "dynamic": "动态"
+      }
+    },
+    "comparison": {
+      "title": "前后对比",
+      "original": "原始",
+      "processed": "已处理",
+      "processPlaceholderTitle": "等待处理",
+      "processPlaceholderHint": "点击开始处理"
+    },
+    "statistics": {
+      "title": "处理完成",
+      "original": "原始文件",
+      "processed": "已处理",
+      "effects": "应用特效",
+      "success": "成功率"
+    },
+    "status": {
+      "originalInfo": "处理前",
+      "processedInfo": "处理后",
+      "processedSmart": "处理完成（智能模式）",
+      "processedCustom": "处理完成（自定义模式）"
+    },
+    "messages": {
+      "removePrefix": "移除",
+      "confirmTitle": "确认",
+      "confirmYes": "确定",
+      "confirmNo": "取消",
+      "uploadRequired": "请先上传视频",
+      "processedSuccess": "处理已完成！",
+      "reportDownloaded": "处理报告下载成功！"
+    }
+  },
+  "noiseReducer": {
+    "header": {
+      "title": "智能降噪",
+      "subtitle": "利用 AI 消除视频中的背景噪声，让声音更清晰，适用于播客、旁白与配音。"
+    },
+    "upload": {
+      "title": "上传素材",
+      "instructions": "点击、拖拽或粘贴文件上传",
+      "hint": "一次最多可上传 8 个文件",
+      "button": "选择文件",
+      "supported": "支持格式：.mp4、.mov、.m4v、.3gp、.avi",
+      "noFile": "未选择文件"
+    },
+    "samples": {
+      "title": "快速示例",
+      "podcast": {
+        "label": "播客",
+        "title": "播客示例"
+      },
+      "meeting": {
+        "label": "会议",
+        "title": "会议示例"
+      },
+      "outdoor": {
+        "label": "户外",
+        "title": "户外示例"
+      },
+      "traffic": {
+        "label": "交通",
+        "title": "交通示例"
+      }
+    },
+    "actions": {
+      "reduce": "开始降噪",
+      "processing": "处理中...",
+      "preview": "下载 5 秒预览视频",
+      "previewSubtitle": "免费",
+      "downloadFull": "下载完整视频",
+      "downloadFullSubtitle": "您是专业会员"
+    },
+    "processing": {
+      "inProgress": "正在处理音频...",
+      "details": "分析频率 • 去除噪声 • 提升清晰度",
+      "completeTitle": "降噪完成！",
+      "completeSubtitle": "干净音频已准备就绪",
+      "previewBadge": "5 秒预览",
+      "placeholderProcessing": "处理中...",
+      "placeholderPending": "等待处理",
+      "placeholderWaitHint": "请稍候",
+      "placeholderStartHint": "点击开始降噪"
+    },
+    "comparison": {
+      "title": "音频对比",
+      "original": "原始",
+      "processed": "处理后",
+      "defaultFileName": "test_video copy 2.mp4",
+      "ready": "等待处理"
+    },
+    "messages": {
+      "invalidFile": "请上传视频文件！",
+      "exceedLimit": "一次最多只能上传 8 个文件",
+      "sampleLoaded": {
+        "podcast": "已加载播客示例",
+        "meeting": "已加载会议示例",
+        "outdoor": "已加载户外示例",
+        "traffic": "已加载交通示例"
+      },
+      "uploadRequired": "请先上传文件",
+      "processingComplete": "降噪完成！",
+      "downloadPreview": "正在下载 5 秒预览视频...",
+      "downloadFull": "正在下载完整视频..."
     }
   }
 }

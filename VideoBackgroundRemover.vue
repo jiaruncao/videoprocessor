@@ -2,16 +2,16 @@
   <div class="video-background-remover-page">
     <!-- 侧边栏 -->
     <aside class="sidebar">
-      <div class="logo">MediaEnhance Pro</div>
+      <div class="logo">{{ translate('app.brand') }}</div>
       <nav>
         <ul class="nav-menu">
-          <li 
-            v-for="(item, index) in menuItems" 
+          <li
+            v-for="(item, index) in menuItems"
             :key="index"
             :class="['nav-item', { active: item.active }]"
             @click="handleMenuClick(index)"
           >
-            <span>{{ item.icon }}</span> {{ item.label }}
+            <span>{{ item.icon }}</span> {{ translate(item.labelKey) }}
           </li>
         </ul>
       </nav>
@@ -19,8 +19,8 @@
         <div class="nav-item user-info">
           <span>👤</span>
           <div class="user-details">
-            <div class="user-name">User Account</div>
-            <div class="user-plan">Pro Member</div>
+            <div class="user-name">{{ translate('app.user.account') }}</div>
+            <div class="user-plan">{{ translate('app.user.proMember') }}</div>
           </div>
         </div>
       </div>
@@ -31,8 +31,18 @@
       <div class="content-wrapper">
         <!-- 标题区域 -->
         <div class="header">
-          <h1>Video Background Remover</h1>
-          <p>Remove the background from your video and replace it with a green or transparent background with just one click.</p>
+          <div class="language-switcher">
+            <label :for="`${$options.name}-locale`" class="language-label">
+              {{ translate('language.label') }}
+            </label>
+            <select :id="`${$options.name}-locale`" v-model="locale" class="language-select">
+              <option v-for="code in availableLocales" :key="code" :value="code">
+                {{ translate(`language.options.${code}`) }}
+              </option>
+            </select>
+          </div>
+          <h1>{{ translate('backgroundRemover.header.title') }}</h1>
+          <p>{{ translate('backgroundRemover.header.subtitle') }}</p>
         </div>
 
         <!-- 主要工作区 -->
@@ -41,7 +51,7 @@
           <div class="workspace-left">
             <!-- 上传区域 -->
             <div class="upload-container">
-              <div class="section-title">Upload Video</div>
+              <div class="section-title">{{ translate('backgroundRemover.upload.title') }}</div>
               <div 
                 :class="['upload-area', { 'has-file': hasFile, 'dragover': isDragover }]"
                 @drop.prevent="handleDrop"
@@ -54,15 +64,15 @@
                 <!-- 上传内容 -->
                 <div v-if="!filePreview" class="upload-content">
                   <div class="upload-icon">⬆️</div>
-                  <div class="upload-title">Click, drop, or paste files to upload</div>
-                  <div class="upload-subtitle">Up to 8 files can be uploaded at a time</div>
-                  <el-button 
-                    type="primary" 
-                    size="small" 
+                  <div class="upload-title">{{ translate('backgroundRemover.upload.instructions') }}</div>
+                  <div class="upload-subtitle">{{ translate('backgroundRemover.upload.hint') }}</div>
+                  <el-button
+                    type="primary"
+                    size="small"
                     class="upload-btn-small"
                     @click.stop="triggerFileInput"
                   >
-                    Choose Files
+                    {{ translate('backgroundRemover.upload.button') }}
                   </el-button>
                   <input 
                     ref="fileInput"
@@ -98,7 +108,7 @@
                 </div>
               </div>
               <div class="supported-formats">
-                Support format: .mp4, .mov, .m4v, .3gp, .avi
+                {{ translate('backgroundRemover.upload.supported') }}
               </div>
             </div>
           </div>
@@ -107,15 +117,15 @@
           <div class="workspace-right">
             <!-- 背景选择设置 -->
             <div class="settings-container">
-              <div class="section-title">Background Options</div>
-              
+              <div class="section-title">{{ translate('backgroundRemover.settings.title') }}</div>
+
               <!-- 背景选择 -->
               <el-radio-group v-model="backgroundMode" @change="handleBackgroundChange" class="background-options">
                 <label class="bg-option">
                   <el-radio label="green" class="custom-radio">
                     <div class="bg-content">
                       <div class="bg-icon green"></div>
-                      <span class="bg-title">Green</span>
+                      <span class="bg-title">{{ translate('backgroundRemover.settings.options.green') }}</span>
                     </div>
                   </el-radio>
                 </label>
@@ -123,7 +133,7 @@
                   <el-radio label="transparent" class="custom-radio">
                     <div class="bg-content">
                       <div class="bg-icon transparent"></div>
-                      <span class="bg-title">Transparent</span>
+                      <span class="bg-title">{{ translate('backgroundRemover.settings.options.transparent') }}</span>
                     </div>
                   </el-radio>
                 </label>
@@ -135,7 +145,8 @@
                 class="test-mode-info"
               >
                 <template slot="title">
-                  <strong>Test Mode:</strong> Processing test_video copy 2.mp4
+                  <strong>{{ translate('backgroundRemover.settings.testModeLabel') }}</strong>
+                  <span>{{ translate('backgroundRemover.settings.testModeValue') }}</span>
                 </template>
               </el-alert>
             </div>
@@ -151,9 +162,9 @@
                 @click="startProcessing"
               >
                 <span class="btn-icon" v-if="!processing">🎬</span>
-                <span>{{ buttonText }}</span>
+                <span>{{ translate(buttonTextKey) }}</span>
               </el-button>
-              
+
               <el-button
                 v-if="processingComplete"
                 type="warning"
@@ -161,10 +172,10 @@
                 @click="downloadPreview"
               >
                 <span class="btn-icon">👁️</span>
-                Download 5s Preview Video
-                <span class="btn-subtitle">(Free!)</span>
+                {{ translate('backgroundRemover.actions.preview') }}
+                <span class="btn-subtitle">{{ translate('backgroundRemover.actions.previewSubtitle') }}</span>
               </el-button>
-              
+
               <el-button
                 v-if="processingComplete"
                 type="success"
@@ -172,15 +183,15 @@
                 @click="downloadFull"
               >
                 <span class="btn-icon">⬇️</span>
-                Download Full Video
-                <span class="btn-subtitle">(Pro)</span>
+                {{ translate('backgroundRemover.actions.download') }}
+                <span class="btn-subtitle">{{ translate('backgroundRemover.actions.downloadSubtitle') }}</span>
               </el-button>
 
               <!-- 处理进度 -->
               <div v-if="processing" class="process-info">
                 <div class="process-status">
                   <div class="status-icon">⏳</div>
-                  <div class="status-text">Processing your video...</div>
+                  <div class="status-text">{{ translate('backgroundRemover.processing.inProgress') }}</div>
                   <div class="status-percent">{{ processPercent }}%</div>
                 </div>
                 <el-progress
@@ -190,15 +201,15 @@
                   class="progress-bar"
                 />
                 <div class="process-details">
-                  <small>Analyzing frames • Removing background • Applying effects</small>
+                  <small>{{ translate('backgroundRemover.processing.details') }}</small>
                 </div>
               </div>
 
               <!-- 完成状态 -->
               <div v-if="showSuccess" class="process-complete">
                 <div class="complete-icon">✅</div>
-                <div class="complete-text">Background Removed Successfully!</div>
-                <div class="complete-subtitle">Your video is ready for download</div>
+                <div class="complete-text">{{ translate('backgroundRemover.processing.completeTitle') }}</div>
+                <div class="complete-subtitle">{{ translate('backgroundRemover.processing.completeSubtitle') }}</div>
               </div>
             </div>
           </div>
@@ -207,36 +218,36 @@
         <!-- 结果对比区域 -->
         <div class="comparison-section">
           <div class="comparison-header">
-            <h2 class="comparison-title">Video Comparison</h2>
+            <h2 class="comparison-title">{{ translate('backgroundRemover.comparison.title') }}</h2>
           </div>
           <div class="comparison-container">
             <!-- 原始视频 -->
             <div class="comparison-item">
               <div class="comparison-label">
-                <span class="label-badge original">Original</span>
-                <span class="label-info">{{ originalInfo }}</span>
+                <span class="label-badge original">{{ translate('backgroundRemover.comparison.original') }}</span>
+                <span class="label-info">{{ translate(originalInfoKey) }}</span>
               </div>
               <div class="canvas-wrapper">
-                <canvas 
-                  ref="originalCanvas" 
-                  :width="canvasWidth" 
+                <canvas
+                  ref="originalCanvas"
+                  :width="canvasWidth"
                   :height="canvasHeight"
                 ></canvas>
                 <div v-if="showOriginalControls" class="video-controls">
-                  <el-button 
-                    type="text" 
+                  <el-button
+                    type="text"
                     class="control-btn"
                     @click="togglePlay('original')"
                   >
                     {{ isPlaying ? '⏸️' : '▶️' }}
                   </el-button>
-                  <span class="preview-time">5s Preview</span>
+                  <span class="preview-time">{{ translate('backgroundRemover.comparison.previewLabel') }}</span>
                 </div>
                 <div v-if="!hasFile" class="upload-placeholder">
                   <div class="placeholder-info">
                     <span class="placeholder-icon">📂</span>
-                    <p>To be uploaded</p>
-                    <small>Upload a video to begin</small>
+                    <p>{{ translate('backgroundRemover.comparison.placeholderTitle') }}</p>
+                    <small>{{ translate('backgroundRemover.comparison.placeholderHint') }}</small>
                   </div>
                 </div>
               </div>
@@ -245,30 +256,30 @@
             <!-- 处理后的视频 -->
             <div class="comparison-item">
               <div class="comparison-label">
-                <span class="label-badge processed">After</span>
-                <span class="label-info">{{ processedInfo }}</span>
+                <span class="label-badge processed">{{ translate('backgroundRemover.comparison.processed') }}</span>
+                <span class="label-info">{{ translate(processedInfoKey) }}</span>
               </div>
               <div class="canvas-wrapper">
-                <canvas 
-                  ref="processedCanvas" 
-                  :width="canvasWidth" 
+                <canvas
+                  ref="processedCanvas"
+                  :width="canvasWidth"
                   :height="canvasHeight"
                 ></canvas>
                 <div v-if="showProcessedControls" class="video-controls">
-                  <el-button 
-                    type="text" 
+                  <el-button
+                    type="text"
                     class="control-btn"
                     @click="togglePlay('processed')"
                   >
                     {{ isPlaying ? '⏸️' : '▶️' }}
                   </el-button>
-                  <span class="preview-time">5s Preview</span>
+                  <span class="preview-time">{{ translate('backgroundRemover.comparison.previewLabel') }}</span>
                 </div>
                 <div v-if="!processingComplete && !processing" class="process-placeholder">
                   <div class="placeholder-info">
                     <span class="placeholder-icon">⏳</span>
-                    <p>{{ placeholderText }}</p>
-                    <small>{{ placeholderHint }}</small>
+                    <p>{{ translate(placeholderTextKey) }}</p>
+                    <small>{{ translate(placeholderHintKey) }}</small>
                   </div>
                 </div>
               </div>
@@ -281,19 +292,23 @@
 </template>
 
 <script>
+import { supportedLocales, translate as translateText } from './i18n'
+
 export default {
   name: 'VideoBackgroundRemover',
   data() {
     return {
+      availableLocales: supportedLocales,
+      locale: 'en-US',
       // 菜单项
       menuItems: [
-        { icon: '📊', label: 'Dashboard', active: false },
-        { icon: '✨', label: 'Video/Image Enhancer', active: false },
-        { icon: '🧹', label: 'Watermark Remover', active: false },
-        { icon: '🎥', label: 'Background Remover', active: true },
-        { icon: '🎨', label: 'Style Transfer', active: false },
-        { icon: '📁', label: 'My Projects', active: false },
-        { icon: '⚙️', label: 'Settings', active: false }
+        { icon: '📊', labelKey: 'menu.dashboard', active: false },
+        { icon: '✨', labelKey: 'menu.videoEnhancer', active: false },
+        { icon: '🧹', labelKey: 'menu.watermarkRemover', active: false },
+        { icon: '🎥', labelKey: 'menu.backgroundRemover', active: true },
+        { icon: '🎨', labelKey: 'menu.styleTransfer', active: false },
+        { icon: '📁', labelKey: 'menu.projects', active: false },
+        { icon: '⚙️', labelKey: 'menu.settings', active: false }
       ],
       
       // 文件相关
@@ -310,7 +325,7 @@ export default {
       processing: false,
       processingComplete: false,
       processPercent: 0,
-      buttonText: 'Remove Background',
+      buttonTextKey: 'backgroundRemover.actions.remove',
       showSuccess: false,
       
       // Canvas相关
@@ -326,10 +341,10 @@ export default {
       // 控制显示
       showOriginalControls: false,
       showProcessedControls: false,
-      originalInfo: 'Original Video',
-      processedInfo: 'Background Removed',
-      placeholderText: 'To be processed',
-      placeholderHint: 'Click Remove Background to begin'
+      originalInfoKey: 'backgroundRemover.status.originalInfo',
+      processedInfoKey: 'backgroundRemover.status.processedInitial',
+      placeholderTextKey: 'backgroundRemover.status.toBeProcessed',
+      placeholderHintKey: 'backgroundRemover.status.processHint'
     }
   },
   
@@ -344,6 +359,10 @@ export default {
   },
   
   methods: {
+    translate(key) {
+      return translateText(this.locale, key)
+    },
+
     // 初始化Canvas
     initCanvas() {
       this.$nextTick(() => {
@@ -404,13 +423,13 @@ export default {
     // 处理文件
     handleFiles(files) {
       if (files.length > 8) {
-        this.$message.error('Maximum 8 files allowed at once')
+        this.$message.error(this.translate('backgroundRemover.messages.uploadLimit'))
         return
       }
-      
+
       const file = files[0]
       if (file.size > 500 * 1024 * 1024) {
-        this.$message.error('File size exceeds 500MB limit')
+        this.$message.error(this.translate('backgroundRemover.messages.fileTooLarge'))
         return
       }
       
@@ -518,13 +537,14 @@ export default {
     
     // 重置为重新处理状态
     resetToReprocess() {
-      this.buttonText = 'Reprocess Video'
+      this.buttonTextKey = 'backgroundRemover.actions.reprocess'
       this.processingComplete = false
       this.showProcessedControls = false
       this.showSuccess = false
-      this.placeholderText = 'Settings changed'
-      this.placeholderHint = 'Click Reprocess to apply new background'
-      
+      this.processedInfoKey = 'backgroundRemover.status.processedInitial'
+      this.placeholderTextKey = 'backgroundRemover.status.settingsChanged'
+      this.placeholderHintKey = 'backgroundRemover.status.reprocessHint'
+
       // 清空处理后的Canvas
       if (this.processedCtx) {
         this.processedCtx.fillStyle = '#000'
@@ -537,16 +557,17 @@ export default {
       this.processing = false
       this.processingComplete = false
       this.processPercent = 0
-      this.buttonText = 'Remove Background'
+      this.buttonTextKey = 'backgroundRemover.actions.remove'
       this.showSuccess = false
-      this.placeholderText = 'To be processed'
-      this.placeholderHint = 'Click Remove Background to begin'
+      this.processedInfoKey = 'backgroundRemover.status.processedInitial'
+      this.placeholderTextKey = 'backgroundRemover.status.toBeProcessed'
+      this.placeholderHintKey = 'backgroundRemover.status.processHint'
     },
-    
+
     // 开始处理
     startProcessing() {
       if (!this.hasFile) {
-        this.$message.warning('Please upload a video first')
+        this.$message.warning(this.translate('backgroundRemover.messages.uploadRequired'))
         return
       }
       
@@ -579,9 +600,11 @@ export default {
     
     // 显示处理结果
     showProcessedResult() {
-      const backgroundText = this.backgroundMode === 'green' ? 'Green Screen' : 'Transparent'
-      this.processedInfo = `${backgroundText} Applied`
-      
+      this.processedInfoKey =
+        this.backgroundMode === 'green'
+          ? 'backgroundRemover.status.processedGreen'
+          : 'backgroundRemover.status.processedTransparent'
+
       // 显示处理后的控制按钮
       this.showProcessedControls = true
       
@@ -708,13 +731,13 @@ export default {
     
     // 下载预览
     downloadPreview() {
-      this.$message.success('Downloading 5s preview video...')
+      this.$message.success(this.translate('backgroundRemover.messages.downloadPreview'))
       // 实际应用中，这里实现预览视频的下载逻辑
     },
-    
+
     // 下载完整视频
     downloadFull() {
-      this.$message.info('Downloading full video (Pro feature)...')
+      this.$message.info(this.translate('backgroundRemover.messages.downloadFull'))
       // 实际应用中，这里实现完整视频的下载逻辑
     }
   }
