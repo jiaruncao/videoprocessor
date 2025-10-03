@@ -1,53 +1,20 @@
 <template>
-  <div class="video-enhancer-page">
-    <!-- 侧边栏 -->
-    <aside class="sidebar">
-      <div class="logo">{{ translate('app.brand') }}</div>
-      <nav class="nav-menu">
-        <div
-          v-for="(item, index) in menuItems"
-          :key="index"
-          :class="['nav-item', { active: item.active }]"
-          @click="handleMenuClick(index)"
-        >
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span>{{ translate(item.labelKey) }}</span>
-        </div>
-      </nav>
-      <div class="user-info">
-        <div class="nav-item user-account">
-          <span class="nav-icon">👤</span>
-          <div class="user-details">
-            <div class="user-name">{{ translate('app.user.account') }}</div>
-            <div class="user-plan">{{ translate('app.user.plan') }}</div>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- 主内容区域 -->
-    <main class="main-container">
-      <div class="content-wrapper">
-        <!-- 标题区域 -->
-        <div class="header">
-          <div class="language-switcher">
-            <label :for="`${$options.name}-locale`" class="language-label">
-              {{ translate('language.label') }}
-            </label>
-            <select :id="`${$options.name}-locale`" v-model="locale" class="language-select">
-              <option v-for="code in availableLocales" :key="code" :value="code">
-                {{ translate(`language.options.${code}`) }}
-              </option>
-            </select>
-          </div>
-          <h1 class="header-title">{{ translate('videoEnhancer.header.title') }}</h1>
-          <p class="header-subtitle">
-            {{ translate('videoEnhancer.header.subtitle') }}
-          </p>
-        </div>
-
-        <!-- 主要工作区 -->
-        <div class="workspace">
+  <DashboardLayout
+    page-class="video-enhancer-page"
+    :menu-items="menuItems"
+    :locale="locale"
+    :available-locales="availableLocales"
+    :brand="translate('app.brand')"
+    :title="translate('videoEnhancer.header.title')"
+    :subtitle="translate('videoEnhancer.header.subtitle')"
+    :user-name="translate('app.user.account')"
+    :user-plan="translate('app.user.plan')"
+    :translate="translate"
+    @select-menu="handleMenuClick"
+    @change-locale="handleLocaleChange"
+  >
+    <!-- 主要工作区 -->
+    <div class="workspace">
           <!-- 左侧：上传和预览区域 -->
           <div class="workspace-left">
             <!-- 上传区域 -->
@@ -207,8 +174,8 @@
           </div>
         </div>
 
-        <!-- 视频对比区域 -->
-        <div class="comparison-section">
+    <!-- 视频对比区域 -->
+    <div class="comparison-section">
           <div class="comparison-header">
             <h2 class="comparison-title">{{ translate('videoEnhancer.comparison.title') }}</h2>
             <div v-show="showVideoControls" class="comparison-controls">
@@ -336,17 +303,50 @@
             </div>
             <span class="time-label">{{ totalTime }}</span>
           </div>
+    </div>
+
+    <!-- 智能洞察 -->
+    <div class="insights-section">
+      <h2 class="section-title">{{ translate('videoEnhancer.insights.title') }}</h2>
+      <div class="insights-grid">
+        <div class="insight-card">
+          <div class="insight-icon">⚡</div>
+          <div class="insight-content">
+            <div class="insight-title">{{ translate('videoEnhancer.insights.performance.title') }}</div>
+            <div class="insight-metric">{{ translate('videoEnhancer.insights.performance.value') }}</div>
+            <p class="insight-description">{{ translate('videoEnhancer.insights.performance.description') }}</p>
+          </div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-icon">🎯</div>
+          <div class="insight-content">
+            <div class="insight-title">{{ translate('videoEnhancer.insights.clarity.title') }}</div>
+            <div class="insight-metric">{{ translate('videoEnhancer.insights.clarity.value') }}</div>
+            <p class="insight-description">{{ translate('videoEnhancer.insights.clarity.description') }}</p>
+          </div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-icon">🌈</div>
+          <div class="insight-content">
+            <div class="insight-title">{{ translate('videoEnhancer.insights.color.title') }}</div>
+            <div class="insight-metric">{{ translate('videoEnhancer.insights.color.value') }}</div>
+            <p class="insight-description">{{ translate('videoEnhancer.insights.color.description') }}</p>
+          </div>
         </div>
       </div>
-    </main>
-  </div>
+    </div>
+  </DashboardLayout>
 </template>
 
 <script>
+import DashboardLayout from './components/dashboard/DashboardLayout.vue'
 import { supportedLocales, translate as translateText } from './i18n'
 
 export default {
   name: 'VideoEnhancer',
+  components: {
+    DashboardLayout
+  },
   data() {
     return {
       availableLocales: supportedLocales,
@@ -435,6 +435,10 @@ export default {
   methods: {
     translate(key) {
       return translateText(this.locale, key)
+    },
+
+    handleLocaleChange(newLocale) {
+      this.locale = newLocale
     },
 
     // 初始化组件

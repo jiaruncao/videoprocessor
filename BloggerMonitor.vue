@@ -1,48 +1,19 @@
 <template>
-  <div class="blogger-monitor-page">
-    <aside class="sidebar">
-      <div class="logo">{{ translate('app.brand') }}</div>
-      <nav>
-        <ul class="nav-menu">
-          <li
-            v-for="(item, index) in menuItems"
-            :key="index"
-            :class="['nav-item', { active: item.active }]"
-            @click="handleMenuClick(index)"
-          >
-            <span>{{ item.icon }}</span> {{ translate(item.labelKey) }}
-          </li>
-        </ul>
-      </nav>
-      <div class="user-section">
-        <div class="nav-item user-account">
-          <span>👤</span>
-          <div class="user-info">
-            <div class="user-name">{{ translate('app.user.account') }}</div>
-            <div class="user-plan">{{ translate('app.user.plan') }}</div>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <main class="main-container">
-      <div class="content-wrapper">
-        <div class="header">
-          <div class="language-switcher">
-            <label :for="`${$options.name}-locale`" class="language-label">
-              {{ translate('language.label') }}
-            </label>
-            <select :id="`${$options.name}-locale`" v-model="locale" class="language-select">
-              <option v-for="code in availableLocales" :key="code" :value="code">
-                {{ translate(`language.options.${code}`) }}
-              </option>
-            </select>
-          </div>
-          <h1>{{ translate('bloggerMonitor.header.title') }}</h1>
-          <p>{{ translate('bloggerMonitor.header.subtitle') }}</p>
-        </div>
-
-        <div class="stats-grid">
+  <DashboardLayout
+    page-class="blogger-monitor-page"
+    :menu-items="menuItems"
+    :locale="locale"
+    :available-locales="availableLocales"
+    :brand="translate('app.brand')"
+    :title="translate('bloggerMonitor.header.title')"
+    :subtitle="translate('bloggerMonitor.header.subtitle')"
+    :user-name="translate('app.user.account')"
+    :user-plan="translate('app.user.plan')"
+    :translate="translate"
+    @select-menu="handleMenuClick"
+    @change-locale="handleLocaleChange"
+  >
+    <div class="stats-grid">
           <div class="stat-card" v-for="stat in statsData" :key="stat.id">
             <span class="stat-icon">{{ stat.icon }}</span>
             <div class="stat-value">{{ stat.value }}</div>
@@ -50,7 +21,7 @@
           </div>
         </div>
 
-        <div class="platform-sections">
+    <div class="platform-sections">
           <div
             v-for="platform in platforms"
             :key="platform.id"
@@ -102,7 +73,7 @@
           </div>
         </div>
 
-        <div class="updates-log-section">
+    <div class="updates-log-section">
           <div class="log-header">
             <h2 class="log-title">📝 {{ translate('bloggerMonitor.log.title') }}</h2>
             <div class="log-filter">
@@ -138,7 +109,7 @@
           </div>
         </div>
 
-        <div class="download-section">
+    <div class="download-section">
           <div class="download-header">
             <h2 class="download-title">{{ translate('bloggerMonitor.downloader.title') }}</h2>
             <p class="download-subtitle">{{ translate('bloggerMonitor.downloader.subtitle') }}</p>
@@ -182,16 +153,18 @@
             </div>
           </transition>
         </div>
-      </div>
-    </main>
-  </div>
+  </DashboardLayout>
 </template>
 
 <script>
+import DashboardLayout from './components/dashboard/DashboardLayout.vue'
 import { supportedLocales, translate as translateText } from './i18n'
 
 export default {
   name: 'BloggerMonitor',
+  components: {
+    DashboardLayout
+  },
   data() {
     return {
       availableLocales: supportedLocales,
@@ -347,6 +320,9 @@ export default {
   methods: {
     translate(key) {
       return translateText(this.locale, key)
+    },
+    handleLocaleChange(newLocale) {
+      this.locale = newLocale
     },
     translateWithParams(key, params = {}) {
       let text = translateText(this.locale, key)
