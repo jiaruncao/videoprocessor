@@ -1,50 +1,19 @@
 <template>
-  <div class="video-background-remover-page">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="logo">{{ translate('app.brand') }}</div>
-      <nav>
-        <ul class="nav-menu">
-          <li
-            v-for="(item, index) in menuItems"
-            :key="index"
-            :class="['nav-item', { active: item.active }]"
-            @click="handleMenuClick(index)"
-          >
-            <span>{{ item.icon }}</span> {{ translate(item.labelKey) }}
-          </li>
-        </ul>
-      </nav>
-      <div class="user-section">
-        <div class="nav-item user-info">
-          <span>👤</span>
-          <div class="user-details">
-            <div class="user-name">{{ translate('app.user.account') }}</div>
-            <div class="user-plan">{{ translate('app.user.plan') }}</div>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-container">
-      <div class="content-wrapper">
-        <div class="header">
-          <div class="language-switcher">
-            <label :for="`${$options.name}-locale`" class="language-label">
-              {{ translate('language.label') }}
-            </label>
-            <select :id="`${$options.name}-locale`" v-model="locale" class="language-select">
-              <option v-for="code in availableLocales" :key="code" :value="code">
-                {{ translate(`language.options.${code}`) }}
-              </option>
-            </select>
-          </div>
-          <h1>{{ translate('backgroundRemover.header.title') }}</h1>
-          <p>{{ translate('backgroundRemover.header.subtitle') }}</p>
-        </div>
-
-        <div class="workspace">
+  <DashboardLayout
+    page-class="video-background-remover-page"
+    :menu-items="menuItems"
+    :locale="locale"
+    :available-locales="availableLocales"
+    :brand="translate('app.brand')"
+    :title="translate('backgroundRemover.header.title')"
+    :subtitle="translate('backgroundRemover.header.subtitle')"
+    :user-name="translate('app.user.account')"
+    :user-plan="translate('app.user.plan')"
+    :translate="translate"
+    @select-menu="handleMenuClick"
+    @change-locale="handleLocaleChange"
+  >
+    <div class="workspace">
           <div class="workspace-left">
             <div class="upload-container">
               <div class="section-title">{{ translate('backgroundRemover.upload.title') }}</div>
@@ -191,7 +160,7 @@
           </div>
         </div>
 
-        <div class="comparison-section">
+    <div class="comparison-section">
           <div class="comparison-header">
             <h2 class="comparison-title">{{ translate('backgroundRemover.comparison.title') }}</h2>
           </div>
@@ -250,17 +219,19 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </main>
-  </div>
+    </div>
+  </DashboardLayout>
 </template>
 
 <script>
+import DashboardLayout from './components/dashboard/DashboardLayout.vue'
 import { supportedLocales, translate as translateText } from './i18n'
 
 export default {
   name: 'VideoBackgroundRemover',
+  components: {
+    DashboardLayout
+  },
   data() {
     return {
       availableLocales: supportedLocales,
@@ -317,6 +288,9 @@ export default {
   methods: {
     translate(key) {
       return translateText(this.locale, key)
+    },
+    handleLocaleChange(newLocale) {
+      this.locale = newLocale
     },
     translateWithParams(key, params = {}) {
       let text = translateText(this.locale, key)

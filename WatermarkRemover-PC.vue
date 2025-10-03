@@ -1,55 +1,20 @@
 <template>
-  <div class="watermark-remover-page">
-    <!-- 侧边栏 -->
-    <aside class="sidebar">
-      <div class="logo">{{ translate('app.brand') }}</div>
-      <nav>
-        <ul class="nav-menu">
-          <li
-            v-for="(item, index) in menuItems"
-            :key="index"
-            :class="['nav-item', { active: item.active }]"
-            @click="handleMenuClick(index)"
-          >
-            <span class="nav-icon">{{ item.icon }}</span>
-            <span>{{ translate(item.labelKey) }}</span>
-          </li>
-        </ul>
-      </nav>
-      <div class="user-info">
-        <div class="nav-item user-account">
-          <span class="nav-icon">👤</span>
-          <div class="user-details">
-            <div class="user-name">{{ translate('app.user.account') }}</div>
-            <div class="user-plan">{{ translate('app.user.plan') }}</div>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- 主内容区域 -->
-    <main class="main-container">
-      <div class="content-wrapper">
-        <!-- 标题区域 -->
-        <div class="header">
-          <div class="language-switcher">
-            <label :for="`${$options.name}-locale`" class="language-label">
-              {{ translate('language.label') }}
-            </label>
-            <select :id="`${$options.name}-locale`" v-model="locale" class="language-select">
-              <option v-for="code in availableLocales" :key="code" :value="code">
-                {{ translate(`language.options.${code}`) }}
-              </option>
-            </select>
-          </div>
-          <h1 class="header-title">{{ translate('watermark.header.title') }}</h1>
-          <p class="header-subtitle">
-            {{ translate('watermark.header.subtitle') }}
-          </p>
-        </div>
-
-        <!-- 主要工作区 -->
-        <div class="workspace">
+  <DashboardLayout
+    page-class="watermark-remover-page"
+    :menu-items="menuItems"
+    :locale="locale"
+    :available-locales="availableLocales"
+    :brand="translate('app.brand')"
+    :title="translate('watermark.header.title')"
+    :subtitle="translate('watermark.header.subtitle')"
+    :user-name="translate('app.user.account')"
+    :user-plan="translate('app.user.plan')"
+    :translate="translate"
+    @select-menu="handleMenuClick"
+    @change-locale="handleLocaleChange"
+  >
+    <!-- 主要工作区 -->
+    <div class="workspace">
           <!-- 左侧：上传和预览区域 -->
           <div class="workspace-left">
             <!-- 上传区域 -->
@@ -202,8 +167,8 @@
           </div>
         </div>
 
-        <!-- 结果对比区域 -->
-        <div class="comparison-section">
+    <!-- 结果对比区域 -->
+    <div class="comparison-section">
           <div class="comparison-header">
             <h2 class="comparison-title">{{ translate('watermark.comparison.title') }}</h2>
           </div>
@@ -274,17 +239,19 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </main>
-  </div>
+    </div>
+  </DashboardLayout>
 </template>
 
 <script>
+import DashboardLayout from './components/dashboard/DashboardLayout.vue'
 import { supportedLocales, translate as translateText } from './i18n'
 
 export default {
   name: 'WatermarkRemover',
+  components: {
+    DashboardLayout
+  },
   data() {
     return {
       availableLocales: supportedLocales,
@@ -358,6 +325,9 @@ export default {
   methods: {
     translate(key) {
       return translateText(this.locale, key)
+    },
+    handleLocaleChange(newLocale) {
+      this.locale = newLocale
     },
 
     // Handle menu click
