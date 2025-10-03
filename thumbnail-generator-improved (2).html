@@ -1,0 +1,2409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thumbnail Generator - User Dashboard</title>
+    <style>
+        /* 全局样式 - 复用自watermark-remover.html */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* 侧边栏样式 - 复用自watermark-remover.html */
+        .sidebar {
+            width: 260px;
+            background: #1a1d23;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px;
+        }
+
+        .logo::before {
+            content: '🎬';
+            font-size: 30px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #8b92a5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 70%;
+            background: white;
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* 主内容区域 - 复用自watermark-remover.html */
+        .main-container {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #f8f9fb;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 标题区域 - 复用自watermark-remover.html */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        /* 工作区布局 - 复用自watermark-remover.html */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .workspace-left, .workspace-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 通用容器样式 - 复用自watermark-remover.html */
+        .upload-container, .samples-container, .settings-container, .actions-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        /* 上传区域 - 复用自watermark-remover.html */
+        .upload-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 40px 20px;
+            background: #fafbfc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .upload-area:hover {
+            border-color: #6366f1;
+            background: #f1f3ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #6366f1;
+            background: #e0e7ff;
+        }
+
+        .upload-area.has-file {
+            border-color: #10b981;
+            background: white;
+            cursor: default;
+        }
+
+        .upload-content {
+            text-align: center;
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+            color: #6366f1;
+        }
+
+        .upload-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .upload-btn-small {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn-small:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* 文件预览 - 复用自watermark-remover.html */
+        .file-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 10px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .file-preview-item {
+            width: 100%;
+            height: calc(100% - 40px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .file-preview-item img, .file-preview-item video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* 上传成功标记 - 复用自watermark-remover.html */
+        .upload-success-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #10b981;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            animation: scaleIn 0.3s ease;
+            z-index: 10;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding: 0 5px;
+        }
+
+        .file-info span {
+            font-size: 13px;
+            color: #64748b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .remove-file {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-file:hover {
+            background: #dc2626;
+        }
+
+        .supported-formats {
+            margin-top: 10px;
+            color: #94a3b8;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* 缩略图比例选择 - Updated to match screenshot design */
+        .ratio-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .ratio-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .ratio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .ratio-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 25px 15px;
+            background: #f8f9fb;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            min-height: 120px;
+        }
+
+        .ratio-option:hover .ratio-content {
+            border-color: #6366f1;
+            background: #f1f3ff;
+            transform: translateY(-2px);
+        }
+
+        .ratio-option input[type="radio"]:checked + .ratio-content {
+            border-color: transparent;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+        }
+
+        /* Ratio preview boxes with proper proportions */
+        .ratio-preview {
+            border: 3px solid currentColor;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* 16:9 YouTube */
+        .ratio-preview.ratio-16-9 {
+            width: 60px;
+            height: 34px;
+        }
+
+        /* 9:16 Shorts */
+        .ratio-preview.ratio-9-16 {
+            width: 34px;
+            height: 60px;
+        }
+
+        /* 4:3 Standard */
+        .ratio-preview.ratio-4-3 {
+            width: 48px;
+            height: 36px;
+        }
+
+        /* 3:4 Instagram */
+        .ratio-preview.ratio-3-4 {
+            width: 36px;
+            height: 48px;
+        }
+
+        .ratio-text {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .ratio-label {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .ratio-option input[type="radio"]:checked + .ratio-content .ratio-label {
+            opacity: 1;
+        }
+
+        /* 文字输入区域 - 改进设计和间距 */
+        .text-input-container {
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            resize: vertical;
+            min-height: 90px;
+            font-family: inherit;
+            background: #fafbfc;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .char-counter {
+            text-align: right;
+            margin-top: 10px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* 情感选择器 - 小缩略图网格样式 */
+        .emotion-selector {
+            margin-bottom: 30px;
+            padding-top: 10px;
+        }
+
+        .emotion-selector .setting-label {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: block;
+            height: 28px;
+            line-height: 28px;
+        }
+
+        .emotion-options {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .emotion-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .emotion-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .emotion-content {
+            position: relative;
+            background: #f8f9fb;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            aspect-ratio: 3/4;
+            min-height: 100px;
+            max-height: 120px;
+        }
+
+        .emotion-option:hover .emotion-content {
+            border-color: #6366f1;
+            background: #f1f3ff;
+            transform: translateY(-2px);
+            z-index: 10;
+        }
+
+        .emotion-option input[type="radio"]:checked + .emotion-content {
+            border-color: #6366f1;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        }
+
+        .emotion-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .emotion-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.5) 50%, transparent);
+            color: white;
+            padding: 4px 4px 6px;
+            font-size: 10px;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .emotion-option input[type="radio"]:checked + .emotion-content .emotion-label {
+            background: linear-gradient(to top, rgba(99, 102, 241, 0.95), rgba(99, 102, 241, 0.6) 50%, transparent);
+        }
+
+        /* 在较小屏幕上调整列数 */
+        @media (max-width: 768px) {
+            .emotion-options {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .emotion-options {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* 操作按钮 - 复用自watermark-remover.html */
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .action-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-generate:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-download {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-icon {
+            font-size: 20px;
+        }
+
+        /* 处理状态 - 复用自watermark-remover.html */
+        .process-info {
+            padding: 20px;
+            background: #f8f9fb;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .process-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .status-icon {
+            font-size: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            flex: 1;
+            font-size: 14px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .status-percent {
+            font-size: 16px;
+            color: #6366f1;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Result section - Updated styles for grid layout */
+        .result-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .result-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .result-subtitle {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        /* Thumbnails grid - FIXED: 动态调整网格布局 */
+        .thumbnails-container {
+            margin-bottom: 30px;
+        }
+
+        .thumbnails-grid {
+            display: grid;
+            gap: 20px;
+            min-height: 200px;
+        }
+        
+        /* 默认16:9横向布局 - 2列 */
+        .thumbnails-grid.ratio-16-9 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        /* 9:16竖向布局 - 4列 */
+        .thumbnails-grid.ratio-9-16 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        /* 4:3横向布局 - 2列 */
+        .thumbnails-grid.ratio-4-3 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        /* 3:4竖向布局 - 3列 */
+        .thumbnails-grid.ratio-3-4 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .thumbnail-item {
+            position: relative;
+            background: #f8f9fb;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+            /* aspect-ratio will be set dynamically via JavaScript */
+        }
+
+        .thumbnail-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-color: #6366f1;
+        }
+
+        .thumbnail-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .thumbnail-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.8) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .thumbnail-item:hover .thumbnail-overlay {
+            opacity: 1;
+        }
+
+        .thumbnail-actions {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .thumbnail-item:hover .thumbnail-actions {
+            opacity: 1;
+        }
+
+        .thumb-btn {
+            flex: 1;
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .thumb-btn:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            color: #94a3b8;
+        }
+
+        /* Result action buttons */
+        .result-actions {
+            display: flex;
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .result-btn {
+            flex: 1;
+            padding: 14px 24px;
+            border-radius: 10px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-download-all {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .btn-download-all:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-regenerate {
+            background: white;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+        }
+
+        .btn-regenerate:hover {
+            background: #f1f3ff;
+            transform: translateY(-2px);
+        }
+
+        .btn-history {
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            color: white;
+        }
+
+        .btn-history:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        /* History modal */
+        .history-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .history-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 30px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .history-header h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .close-history {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: #f8f9fb;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .close-history:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .history-list {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .history-group {
+            margin-bottom: 30px;
+        }
+
+        .history-date {
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .history-thumbnails {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .history-thumb {
+            aspect-ratio: 16/9;
+            background: #f8f9fb;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-thumb:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .history-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 视频帧选择器 - 改进版本 */
+        .frame-selector {
+            margin-top: 20px;
+            padding: 30px;
+            background: #1a1d23;
+            border-radius: 16px;
+            display: none;
+            position: relative;
+            transition: all 0.3s ease;
+            min-height: 580px;
+        }
+
+        .frame-selector.active {
+            display: block;
+        }
+
+        /* 已确认状态样式 */
+        .frame-selector.confirmed {
+            background: linear-gradient(135deg, #1a1d23 0%, #2d3142 100%);
+            border: 2px solid #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .frame-label {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 28px;
+            line-height: 28px;
+        }
+
+        /* 成功标记 */
+        .frame-selected-badge {
+            display: none;
+            background: #10b981;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .frame-selector.confirmed .frame-selected-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: scale(0.9);
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+        }
+
+        /* 视频预览区域 - 更大尺寸 */
+        .frame-preview-container {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            height: 340px;
+        }
+
+        .frame-preview-video {
+            width: 100%;
+            height: 340px;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* 时间轴控制区域 */
+        .timeline-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .timeline-time {
+            color: #94a3b8;
+            font-size: 13px;
+            min-width: 70px;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .timeline-time.current {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* 播放/暂停按钮 */
+        .frame-play-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .frame-play-btn:hover {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: #6366f1;
+            transform: scale(1.1);
+        }
+
+        /* 缩略图时间轴 */
+        .thumbnail-timeline {
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            overflow: hidden;
+        }
+
+        .timeline-track {
+            position: relative;
+            height: 75px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            cursor: pointer;
+        }
+
+        .timeline-track::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .timeline-track::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .timeline-track::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 3px;
+        }
+
+        .timeline-frames {
+            display: flex;
+            height: 100%;
+            position: relative;
+            min-width: 100%;
+        }
+
+        .timeline-frame {
+            flex-shrink: 0;
+            width: 80px;
+            height: 100%;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .timeline-frame:hover {
+            transform: scaleY(1.1);
+            z-index: 2;
+        }
+
+        .timeline-frame.selected {
+            box-shadow: 0 0 0 2px #6366f1;
+            z-index: 3;
+        }
+
+        .timeline-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.7;
+        }
+
+        .timeline-frame:hover img,
+        .timeline-frame.selected img {
+            opacity: 1;
+        }
+
+        /* 时间轴指示器 */
+        .timeline-indicator {
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: #6366f1;
+            pointer-events: none;
+            z-index: 4;
+            transition: left 0.1s linear;
+        }
+
+        .timeline-indicator::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            width: 10px;
+            height: 10px;
+            background: #6366f1;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        /* 选择按钮 */
+        .select-frame-btn {
+            margin-top: 15px;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .select-frame-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .select-frame-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 重新选择按钮 */
+        .select-frame-btn.reselect {
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+        }
+
+        .select-frame-btn.reselect:hover {
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        /* 视频帧确认提示 */
+        .frame-confirmation {
+            display: none;
+            background: #10b981;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+        }
+
+        .frame-selector.confirmed .frame-confirmation {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive updates */
+        @media (max-width: 1024px) {
+            .thumbnails-grid.ratio-16-9,
+            .thumbnails-grid.ratio-4-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .thumbnails-grid.ratio-9-16 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .thumbnails-grid.ratio-3-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .history-thumbnails {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-container {
+                padding: 20px;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .thumbnails-grid.ratio-16-9,
+            .thumbnails-grid.ratio-4-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .thumbnails-grid.ratio-9-16,
+            .thumbnails-grid.ratio-3-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .result-actions {
+                flex-direction: column;
+            }
+            
+            .history-thumbnails {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .thumbnails-grid.ratio-9-16,
+            .thumbnails-grid.ratio-3-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* 空状态 - 新增样式 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .empty-text {
+            font-size: 14px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="logo">MediaEnhance Pro</div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <span>📊</span> Dashboard
+                </li>
+                <li class="nav-item">
+                    <span>✨</span> Video/Image Enhancer
+                </li>
+                <li class="nav-item">
+                    <span>🧹</span> Watermark Remover
+                </li>
+                <li class="nav-item active">
+                    <span>🖼️</span> Thumbnail Generator
+                </li>
+                <li class="nav-item">
+                    <span>🎨</span> Style Transfer
+                </li>
+                <li class="nav-item">
+                    <span>🔊</span> Audio Enhancement
+                </li>
+                <li class="nav-item">
+                    <span>📁</span> My Projects
+                </li>
+                <li class="nav-item">
+                    <span>⚙️</span> Settings
+                </li>
+            </ul>
+        </nav>
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: auto;">
+            <div class="nav-item" style="background: rgba(255,255,255,0.05); padding: 12px 18px;">
+                <span>👤</span>
+                <div style="flex: 1;">
+                    <div style="color: white; font-size: 14px; font-weight: 600;">User Account</div>
+                    <div style="color: #8b92a5; font-size: 12px; margin-top: 2px;">Free Plan</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-container">
+        <div class="content-wrapper">
+            <!-- 标题区域 -->
+            <div class="header">
+                <h1>Thumbnail Generator</h1>
+                <p>Create eye-catching thumbnails for your videos and images with AI-powered text overlays, perfect ratios, and emotional expressions to maximize engagement.</p>
+            </div>
+
+            <!-- 主要工作区 -->
+            <div class="workspace">
+                <!-- 左侧：上传和预览区域 -->
+                <div class="workspace-left">
+                    <!-- 上传区域 -->
+                    <div class="upload-container">
+                        <div class="section-title">Upload Media</div>
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-success-badge" id="uploadSuccessBadge" style="display: none;">✔</div>
+                            <div class="upload-content" id="uploadContent">
+                                <div class="upload-icon">⬆️</div>
+                                <div class="upload-title">Drop your image or video here</div>
+                                <div class="upload-subtitle">or click to browse</div>
+                                <button class="upload-btn-small" onclick="document.getElementById('fileInput').click()">
+                                    Choose Files
+                                </button>
+                                <input type="file" id="fileInput" class="file-input" accept=".mp4,.mov,.m4v,.avi,.jpg,.jpeg,.png" onchange="handleFileSelect(event)">
+                            </div>
+                            <!-- 文件预览将在这里显示 -->
+                            <div class="file-preview" id="filePreview" style="display: none;">
+                                <div class="file-preview-item">
+                                    <img id="previewImage" src="" alt="Preview" style="display: none;">
+                                    <video id="previewVideo" controls style="display: none;"></video>
+                                </div>
+                                <div class="file-info">
+                                    <span id="fileName">No file selected</span>
+                                    <button class="remove-file" onclick="removeFile()">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="supported-formats">
+                            Supported: .mp4, .mov, .m4v, .avi, .jpg, .jpeg, .png (Max 100MB)
+                        </div>
+                        
+                        <!-- 改进的视频帧选择器 -->
+                        <div class="frame-selector" id="frameSelector">
+                            <div class="frame-label">
+                                <span>Select Video Frame for Thumbnail</span>
+                                <span class="frame-selected-badge" id="frameSelectedBadge">
+                                    ✓ Frame Selected
+                                </span>
+                            </div>
+                            
+                            <!-- 视频预览 -->
+                            <div class="frame-preview-container">
+                                <video id="framePreviewVideo" class="frame-preview-video" muted></video>
+                            </div>
+                            
+                            <!-- 时间轴控制 -->
+                            <div class="timeline-controls">
+                                <button class="frame-play-btn" id="framePlayBtn" onclick="toggleFramePlay()">
+                                    <span style="font-size: 14px;">▶</span>
+                                </button>
+                                <span class="timeline-time current" id="currentFrameTime">00:00:00</span>
+                                <span style="color: #64748b; font-size: 13px;">/</span>
+                                <span class="timeline-time" id="totalFrameTime">00:00:05</span>
+                            </div>
+                            
+                            <!-- 缩略图时间轴 -->
+                            <div class="thumbnail-timeline">
+                                <div class="timeline-track" id="timelineTrack" onclick="seekToFrame(event)">
+                                    <div class="timeline-frames" id="timelineFrames">
+                                        <!-- 缩略图将动态生成 -->
+                                    </div>
+                                    <div class="timeline-indicator" id="timelineIndicator" style="left: 0;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- 选择按钮 -->
+                            <button class="select-frame-btn" id="selectFrameBtn" onclick="confirmFrameSelection()">
+                                <span>✓</span>
+                                <span id="selectFrameText">Use This Frame for Thumbnail</span>
+                            </button>
+                            
+                            <!-- 确认提示 -->
+                            <div class="frame-confirmation" id="frameConfirmation">
+                                ✓ Frame successfully selected for thumbnail
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧：设置和选项 -->
+                <div class="workspace-right">
+                    <!-- 缩略图设置 -->
+                    <div class="settings-container">
+                        <div class="section-title">Thumbnail Settings</div>
+                        
+                        <!-- 比例选择 - Updated to match screenshot -->
+                        <div class="setting-group">
+                            <div class="setting-label">Select Thumbnail Ratio</div>
+                            <div class="ratio-selector">
+                                <label class="ratio-option">
+                                    <input type="radio" name="thumbnailRatio" value="16:9" checked onchange="handleRatioChange()">
+                                    <div class="ratio-content">
+                                        <div class="ratio-preview ratio-16-9">16:9</div>
+                                        <span class="ratio-label">YouTube</span>
+                                    </div>
+                                </label>
+                                <label class="ratio-option">
+                                    <input type="radio" name="thumbnailRatio" value="9:16" onchange="handleRatioChange()">
+                                    <div class="ratio-content">
+                                        <div class="ratio-preview ratio-9-16">9:16</div>
+                                        <span class="ratio-label">Shorts</span>
+                                    </div>
+                                </label>
+                                <label class="ratio-option">
+                                    <input type="radio" name="thumbnailRatio" value="4:3" onchange="handleRatioChange()">
+                                    <div class="ratio-content">
+                                        <div class="ratio-preview ratio-4-3">4:3</div>
+                                        <span class="ratio-label">4:3</span>
+                                    </div>
+                                </label>
+                                <label class="ratio-option">
+                                    <input type="radio" name="thumbnailRatio" value="3:4" onchange="handleRatioChange()">
+                                    <div class="ratio-content">
+                                        <div class="ratio-preview ratio-3-4">3:4</div>
+                                        <span class="ratio-label">Instagram</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 文字输入 -->
+                        <div class="text-input-container">
+                            <div class="setting-label">Enter thumbnail text</div>
+                            <textarea class="text-input" id="thumbnailText" placeholder="Make you fit and healthy!! test sss" maxlength="150" oninput="updateCharCounter()"></textarea>
+                            <div class="char-counter"><span id="charCount">0</span> / 150</div>
+                        </div>
+
+                        <!-- 情感选择 - 11个小缩略图 -->
+                        <div class="emotion-selector">
+                            <div class="setting-label">Emotion</div>
+                            <div class="emotion-options">
+                                <label class="emotion-option">
+                                    <input type="radio" name="emotion" value="none" checked onchange="handleEmotionChange()">
+                                    <div class="emotion-content">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23f0f0f0' width='9' height='16'/%3E%3Ccircle cx='4.5' cy='8' r='2' fill='%23d0d0d0'/%3E%3C/svg%3E" class="emotion-image" alt="None">
+                                        <span class="emotion-label">None</span>
+                                    </div>
+                                </label>
+                                <label class="emotion-option">
+                                    <input type="radio" name="emotion" value="happy" onchange="handleEmotionChange()">
+                                    <div class="emotion-content">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23ffe766' width='9' height='16'/%3E%3Cpath d='M 3 9 Q 4.5 10 6 9' stroke='%23333' stroke-width='0.2' fill='none'/%3E%3C/svg%3E" class="emotion-image" alt="Happy">
+                                        <span class="emotion-label">Happy</span>
+                                    </div>
+                                </label>
+                                <label class="emotion-option">
+                                    <input type="radio" name="emotion" value="excited" onchange="handleEmotionChange()">
+                                    <div class="emotion-content">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23ff6b6b' width='9' height='16'/%3E%3Ccircle cx='4.5' cy='8' r='1.5' fill='%23fff'/%3E%3C/svg%3E" class="emotion-image" alt="Excited">
+                                        <span class="emotion-label">Excited</span>
+                                    </div>
+                                </label>
+                                <label class="emotion-option">
+                                    <input type="radio" name="emotion" value="surprised" onchange="handleEmotionChange()">
+                                    <div class="emotion-content">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23a8e6cf' width='9' height='16'/%3E%3Ccircle cx='4.5' cy='8' r='2' fill='%23fff' stroke='%23333' stroke-width='0.1'/%3E%3C/svg%3E" class="emotion-image" alt="Surprised">
+                                        <span class="emotion-label">Surprised</span>
+                                    </div>
+                                </label>
+                                <label class="emotion-option">
+                                    <input type="radio" name="emotion" value="anxious" onchange="handleEmotionChange()">
+                                    <div class="emotion-content">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23b8d4f0' width='9' height='16'/%3E%3Cpath d='M 3 9 Q 4.5 8.5 6 9' stroke='%23333' stroke-width='0.2' fill='none'/%3E%3C/svg%3E" class="emotion-image" alt="Anxious">
+                                        <span class="emotion-label">Anxious</span>
+                                    </div>
+                                </label>
+                                <label class="emotion-option">
+                                    <input type="radio" name="emotion" value="curious" onchange="handleEmotionChange()">
+                                    <div class="emotion-content">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23dda8ff' width='9' height='16'/%3E%3Ctext x='4.5' y='10' text-anchor='middle' font-size='4' fill='%23333'>?%3C/text%3E%3C/svg%3E" class="emotion-image" alt="Curious">
+                                        <span class="emotion-label">Curious</span>
+                                    </div>
+                                </label>
+                                <label class="emotion-option">
+                                    <input type="radio" name="emotion" value="angry" onchange="handleEmotionChange()">
+                                    <div class="emotion-content">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23ff9999' width='9' height='16'/%3E%3Cpath d='M 3 10 Q 4.5 9 6 10' stroke='%23333' stroke-width='0.2' fill='none'/%3E%3C/svg%3E" class="emotion-image" alt="Angry">
+                                        <span class="emotion-label">Angry</span>
+                                    </div>
+                                </label>
+                                <label class="emotion-option">
+                                    <input type="radio" name="emotion" value="sad" onchange="handleEmotionChange()">
+                                    <div class="emotion-content">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%2399ccff' width='9' height='16'/%3E%3Cpath d='M 3 10 Q 4.5 9 6 10' stroke='%23333' stroke-width='0.2' fill='none'/%3E%3C/svg%3E" class="emotion-image" alt="Sad">
+                                        <span class="emotion-label">Sad</span>
+                                    </div>
+                                </label>
+                                <label class="emotion-option">
+                                    <input type="radio" name="emotion" value="cool" onchange="handleEmotionChange()">
+                                    <div class="emotion-content">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%2366d9ef' width='9' height='16'/%3E%3Crect x='2' y='7' width='5' height='1' fill='%23333'/%3E%3C/svg%3E" class="emotion-image" alt="Cool">
+                                        <span class="emotion-label">Cool</span>
+                                    </div>
+                                </label>
+                                <label class="emotion-option">
+                                    <input type="radio" name="emotion" value="love" onchange="handleEmotionChange()">
+                                    <div class="emotion-content">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23ffb3d9' width='9' height='16'/%3E%3Cpath d='M 4.5 7 L 3 8 L 4.5 10 L 6 8 Z' fill='%23ff66b3'/%3E%3C/svg%3E" class="emotion-image" alt="Love">
+                                        <span class="emotion-label">Love</span>
+                                    </div>
+                                </label>
+                                <label class="emotion-option">
+                                    <input type="radio" name="emotion" value="mischievous" onchange="handleEmotionChange()">
+                                    <div class="emotion-content">
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23ffb366' width='9' height='16'/%3E%3Cpath d='M 3 9 Q 3.75 9.5 4.5 9 Q 5.25 8.5 6 9' stroke='%23333' stroke-width='0.2' fill='none'/%3E%3C/svg%3E" class="emotion-image" alt="Mischievous">
+                                        <span class="emotion-label">Playful</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="actions-container">
+                        <button class="action-btn btn-generate" id="generateBtn" onclick="startGenerating()">
+                            <span class="btn-icon">🎨</span>
+                            <span id="btnText">Generate Thumbnails</span>
+                        </button>
+                        <button class="action-btn btn-download" id="downloadBtn" style="display: none;" onclick="downloadThumbnails()">
+                            <span class="btn-icon">⬇️</span>
+                            Download All Thumbnails
+                        </button>
+                        <div class="process-info" id="processInfo" style="display: none;">
+                            <div class="process-status">
+                                <div class="status-icon">⏳</div>
+                                <div class="status-text">Generating thumbnails...</div>
+                                <div class="status-percent" id="processPercent">0%</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result preview area - Updated to show grid of thumbnails -->
+            <div class="result-section" id="resultSection">
+                <div class="result-header">
+                    <h2 class="result-title">Generated Thumbnails</h2>
+                    <p class="result-subtitle">Generated on <span id="generatedDate">--/--/----</span>, will expire in <span id="expireDays">30</span> day(s)</p>
+                </div>
+                
+                <!-- Thumbnail grid container -->
+                <div class="thumbnails-container">
+                    <div class="thumbnails-grid ratio-16-9" id="thumbnailsGrid">
+                        <!-- Thumbnails will be generated here -->
+                        <div class="empty-state" id="emptyState">
+                            <div style="font-size: 48px; margin-bottom: 15px;">🎨</div>
+                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No thumbnails yet</div>
+                            <div style="color: #64748b;">Upload media and click "Generate Thumbnail" to see results here</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action buttons -->
+                <div class="result-actions" id="resultActions" style="display: none;">
+                    <button class="result-btn btn-download-all" onclick="downloadAllThumbnails()">
+                        <span>📦</span> Download All
+                    </button>
+                    <button class="result-btn btn-regenerate" onclick="regenerateThumbnails()">
+                        <span>🔄</span> Regenerate New Set
+                    </button>
+                    <button class="result-btn btn-history" onclick="showHistory()">
+                        <span>📜</span> View History
+                    </button>
+                </div>
+                
+                <!-- History modal -->
+                <div class="history-modal" id="historyModal" style="display: none;">
+                    <div class="history-content">
+                        <div class="history-header">
+                            <h3>Generation History</h3>
+                            <button class="close-history" onclick="closeHistory()">✕</button>
+                        </div>
+                        <div class="history-list" id="historyList">
+                            <!-- History items will be shown here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 全局变量
+        let currentFile = null;
+        let isProcessed = false;
+        let processingComplete = false;
+        let videoElement = null;
+        let selectedFrame = null;
+        let frameConfirmed = false;
+        let isPlaying = false;
+        let animationFrame = null;
+
+        // 文件拖拽功能 - 复用自watermark-remover.html
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (!currentFile) {
+                uploadArea.classList.add('dragover');
+            }
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (!currentFile) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+
+        // 处理文件选择
+        function handleFileSelect(event) {
+            handleFiles(event.target.files);
+        }
+
+        // 处理文件
+        function handleFiles(files) {
+            if (files.length > 0) {
+                // 检查文件大小
+                if (files[0].size > 100 * 1024 * 1024) {
+                    alert('File size exceeds 100MB limit');
+                    return;
+                }
+
+                // 保存文件并显示预览
+                currentFile = files[0];
+                displayPreview(currentFile);
+                
+                // 延迟显示成功标记，模拟上传过程
+                setTimeout(() => {
+                    showUploadSuccess();
+                    resetProcessingState();
+                }, 500);
+            }
+        }
+
+        // 显示上传成功标记
+        function showUploadSuccess() {
+            const badge = document.getElementById('uploadSuccessBadge');
+            const uploadArea = document.getElementById('uploadArea');
+            badge.style.display = 'flex';
+            uploadArea.classList.add('has-file');
+        }
+
+        // 显示预览
+        function displayPreview(file) {
+            const reader = new FileReader();
+            const filePreview = document.getElementById('filePreview');
+            const uploadContent = document.getElementById('uploadContent');
+            const previewImage = document.getElementById('previewImage');
+            const previewVideo = document.getElementById('previewVideo');
+            const fileName = document.getElementById('fileName');
+            const frameSelector = document.getElementById('frameSelector');
+
+            reader.onload = function(e) {
+                uploadContent.style.display = 'none';
+                filePreview.style.display = 'block';
+                fileName.textContent = file.name;
+
+                if (file.type.startsWith('image/')) {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                    previewVideo.style.display = 'none';
+                    frameSelector.classList.remove('active');
+                    frameSelector.classList.remove('confirmed');
+                    frameConfirmed = false;
+                } else if (file.type.startsWith('video/')) {
+                    previewVideo.src = e.target.result;
+                    previewVideo.style.display = 'block';
+                    previewImage.style.display = 'none';
+                    frameSelector.classList.add('active');
+                    frameSelector.classList.remove('confirmed');
+                    frameConfirmed = false;
+                    
+                    // 设置视频元素引用
+                    videoElement = previewVideo;
+                    
+                    // 视频加载完成后设置帧选择器
+                    previewVideo.onloadedmetadata = function() {
+                        setupFrameSelector(previewVideo);
+                    };
+                }
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // 设置视频帧选择器
+        function setupFrameSelector(video) {
+            const framePreviewVideo = document.getElementById('framePreviewVideo');
+            const totalFrameTime = document.getElementById('totalFrameTime');
+            const timelineFrames = document.getElementById('timelineFrames');
+            
+            // 设置预览视频源
+            framePreviewVideo.src = video.src;
+            
+            framePreviewVideo.onloadedmetadata = function() {
+                const duration = framePreviewVideo.duration;
+                totalFrameTime.textContent = formatTimeDetailed(duration);
+                
+                // 生成缩略图
+                generateTimelineThumbnails(framePreviewVideo);
+                
+                // 设置时间更新监听器
+                framePreviewVideo.addEventListener('timeupdate', updateTimelineProgress);
+            };
+        }
+
+        // 更新时间轴进度
+        function updateTimelineProgress() {
+            const framePreviewVideo = document.getElementById('framePreviewVideo');
+            const currentFrameTime = document.getElementById('currentFrameTime');
+            const timelineIndicator = document.getElementById('timelineIndicator');
+            
+            if (!framePreviewVideo || !framePreviewVideo.duration) return;
+            
+            const currentTime = framePreviewVideo.currentTime;
+            const duration = framePreviewVideo.duration;
+            const percent = (currentTime / duration) * 100;
+            
+            currentFrameTime.textContent = formatTimeDetailed(currentTime);
+            timelineIndicator.style.left = percent + '%';
+            
+            // 如果视频结束，暂停并重置按钮
+            if (framePreviewVideo.ended) {
+                isPlaying = false;
+                const framePlayBtn = document.getElementById('framePlayBtn');
+                framePlayBtn.innerHTML = '<span style="font-size: 14px;">▶</span>';
+                cancelAnimationFrame(animationFrame);
+            }
+        }
+
+        // 生成时间轴缩略图
+        function generateTimelineThumbnails(video) {
+            const timelineFrames = document.getElementById('timelineFrames');
+            const duration = video.duration;
+            const frameCount = 10; // 生成10个缩略图
+            
+            timelineFrames.innerHTML = '';
+            
+            for (let i = 0; i < frameCount; i++) {
+                const time = (duration / frameCount) * i;
+                const frameDiv = document.createElement('div');
+                frameDiv.className = 'timeline-frame';
+                frameDiv.dataset.time = time;
+                
+                // 创建canvas来捕获帧
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // 创建临时视频元素来捕获特定时间的帧
+                const tempVideo = document.createElement('video');
+                tempVideo.src = video.src;
+                tempVideo.currentTime = time;
+                tempVideo.muted = true;
+                
+                tempVideo.onseeked = function() {
+                    canvas.width = tempVideo.videoWidth;
+                    canvas.height = tempVideo.videoHeight;
+                    ctx.drawImage(tempVideo, 0, 0, canvas.width, canvas.height);
+                    
+                    const img = document.createElement('img');
+                    img.src = canvas.toDataURL('image/jpeg', 0.5);
+                    frameDiv.appendChild(img);
+                    
+                    frameDiv.onclick = function() {
+                        selectFrame(time);
+                    };
+                };
+                
+                timelineFrames.appendChild(frameDiv);
+            }
+            
+            // 选择第一帧
+            selectFrame(0);
+        }
+
+        // 选择特定帧
+        function selectFrame(time) {
+            const framePreviewVideo = document.getElementById('framePreviewVideo');
+            const currentFrameTime = document.getElementById('currentFrameTime');
+            const timelineIndicator = document.getElementById('timelineIndicator');
+            
+            framePreviewVideo.currentTime = time;
+            currentFrameTime.textContent = formatTimeDetailed(time);
+            
+            // 更新指示器位置
+            const percent = (time / framePreviewVideo.duration) * 100;
+            timelineIndicator.style.left = percent + '%';
+            
+            // 更新选中状态
+            document.querySelectorAll('.timeline-frame').forEach(frame => {
+                frame.classList.remove('selected');
+                if (Math.abs(parseFloat(frame.dataset.time) - time) < 0.1) {
+                    frame.classList.add('selected');
+                }
+            });
+            
+            // 捕获当前帧
+            captureCurrentFrame(framePreviewVideo);
+        }
+
+        // 捕获当前视频帧
+        function captureCurrentFrame(video) {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            selectedFrame = canvas.toDataURL('image/jpeg');
+        }
+
+        // 播放/暂停帧预览
+        function toggleFramePlay() {
+            const framePreviewVideo = document.getElementById('framePreviewVideo');
+            const framePlayBtn = document.getElementById('framePlayBtn');
+            
+            if (framePreviewVideo.paused) {
+                framePreviewVideo.play();
+                framePlayBtn.innerHTML = '<span style="font-size: 14px;">⏸</span>';
+                isPlaying = true;
+                // 使用requestAnimationFrame来更新进度
+                function updateProgress() {
+                    updateTimelineProgress();
+                    if (isPlaying) {
+                        animationFrame = requestAnimationFrame(updateProgress);
+                    }
+                }
+                updateProgress();
+            } else {
+                framePreviewVideo.pause();
+                framePlayBtn.innerHTML = '<span style="font-size: 14px;">▶</span>';
+                isPlaying = false;
+                cancelAnimationFrame(animationFrame);
+            }
+        }
+
+        // 点击时间轴跳转
+        function seekToFrame(event) {
+            const timelineTrack = document.getElementById('timelineTrack');
+            const framePreviewVideo = document.getElementById('framePreviewVideo');
+            const rect = timelineTrack.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const percent = x / rect.width;
+            const time = framePreviewVideo.duration * percent;
+            
+            selectFrame(time);
+        }
+
+        // 确认帧选择
+        function confirmFrameSelection() {
+            const frameSelector = document.getElementById('frameSelector');
+            const selectFrameBtn = document.getElementById('selectFrameBtn');
+            const selectFrameText = document.getElementById('selectFrameText');
+            
+            if (!frameConfirmed) {
+                // 第一次点击 - 确认选择
+                frameSelector.classList.add('confirmed');
+                frameConfirmed = true;
+                
+                // 更新按钮为重新选择
+                selectFrameBtn.classList.add('reselect');
+                selectFrameText.textContent = 'Reselect Frame';
+                
+                // 震动反馈动画
+                selectFrameBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    selectFrameBtn.style.transform = 'scale(1)';
+                }, 100);
+            } else {
+                // 第二次点击 - 重新选择
+                frameSelector.classList.remove('confirmed');
+                frameConfirmed = false;
+                
+                // 恢复按钮为使用选择
+                selectFrameBtn.classList.remove('reselect');
+                selectFrameText.textContent = 'Use This Frame for Thumbnail';
+            }
+        }
+
+        // 格式化详细时间
+        function formatTimeDetailed(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            const ms = Math.floor((seconds % 1) * 100);
+            
+            if (hours > 0) {
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${ms.toString().padStart(2, '0')}`;
+        }
+
+        // 移除文件
+        function removeFile() {
+            document.getElementById('uploadContent').style.display = 'block';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('previewImage').src = '';
+            document.getElementById('previewVideo').src = '';
+            document.getElementById('uploadSuccessBadge').style.display = 'none';
+            document.getElementById('uploadArea').classList.remove('has-file');
+            document.getElementById('frameSelector').classList.remove('active');
+            document.getElementById('frameSelector').classList.remove('confirmed');
+            
+            currentFile = null;
+            videoElement = null;
+            selectedFrame = null;
+            frameConfirmed = false;
+            isPlaying = false;
+            cancelAnimationFrame(animationFrame);
+            resetProcessingState();
+            clearThumbnails();
+        }
+
+        // 处理比例更改
+        function handleRatioChange() {
+            const ratio = document.querySelector('input[name="thumbnailRatio"]:checked').value;
+            console.log('Thumbnail ratio changed to:', ratio);
+        }
+
+        // 处理情感更改
+        function handleEmotionChange() {
+            const emotion = document.querySelector('input[name="emotion"]:checked').value;
+            console.log('Emotion changed to:', emotion);
+        }
+
+        // 更新字符计数
+        function updateCharCounter() {
+            const text = document.getElementById('thumbnailText').value;
+            document.getElementById('charCount').textContent = text.length;
+        }
+
+        // 重置处理状态
+        function resetProcessingState() {
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const btnText = document.getElementById('btnText');
+            const processInfo = document.getElementById('processInfo');
+            
+            generateBtn.style.display = 'block';
+            generateBtn.disabled = false;
+            downloadBtn.style.display = 'none';
+            btnText.textContent = 'Generate Thumbnails';
+            processInfo.style.display = 'none';
+            
+            processingComplete = false;
+        }
+
+        // 开始生成缩略图
+        function startGenerating() {
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const processInfo = document.getElementById('processInfo');
+            const progressFill = document.getElementById('progressFill');
+            const processPercent = document.getElementById('processPercent');
+
+            // 检查是否有文件
+            if (!currentFile) {
+                alert('Please upload a file first');
+                return;
+            }
+
+            // 检查视频文件是否已选择帧
+            const previewVideo = document.getElementById('previewVideo');
+            if (previewVideo.style.display === 'block' && !frameConfirmed) {
+                alert('Please select and confirm a frame from the video first');
+                return;
+            }
+
+            // 获取文字输入
+            const thumbnailText = document.getElementById('thumbnailText').value;
+            if (!thumbnailText.trim()) {
+                alert('Please enter thumbnail text');
+                return;
+            }
+
+            // 显示处理状态
+            generateBtn.disabled = true;
+            processInfo.style.display = 'block';
+
+            // 模拟处理进度
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 20;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    // 处理完成
+                    setTimeout(() => {
+                        generateBtn.style.display = 'none';
+                        downloadBtn.style.display = 'block';
+                        processInfo.style.display = 'none';
+                        
+                        processingComplete = true;
+                        generateThumbnails();
+                        updateGeneratedInfo();
+                    }, 500);
+                }
+                progressFill.style.width = progress + '%';
+                processPercent.textContent = Math.round(progress) + '%';
+            }, 200);
+        }
+
+        // 生成缩略图 - 改为生成4个缩略图
+        function generateThumbnails() {
+            showGeneratedResults();
+        }
+
+        // 显示生成结果 - FIXED: 根据比例动态调整网格
+        function showGeneratedResults() {
+            const thumbnailsGrid = document.getElementById('thumbnailsGrid');
+            const emptyState = document.getElementById('emptyState');
+            const resultActions = document.getElementById('resultActions');
+            const ratio = document.querySelector('input[name="thumbnailRatio"]:checked')?.value || '16:9';
+            const thumbnailText = document.getElementById('thumbnailText')?.value || 'Make you fit and healthy!!';
+            
+            // Hide empty state, show actions
+            if (emptyState) emptyState.style.display = 'none';
+            resultActions.style.display = 'flex';
+            
+            // Clear existing thumbnails
+            const existingThumbs = thumbnailsGrid.querySelectorAll('.thumbnail-item');
+            existingThumbs.forEach(thumb => thumb.remove());
+            
+            // FIXED: 根据选择的比例设置网格类
+            thumbnailsGrid.className = `thumbnails-grid ratio-${ratio.replace(':', '-')}`;
+            
+            // Generate 4 different style variations
+            const styles = [
+                { bgColor: '#00bfff', textColor: 'white', fontSize: 48, position: 'center' },
+                { bgColor: '#ff6b6b', textColor: 'white', fontSize: 52, position: 'bottom' },
+                { bgColor: '#4ecdc4', textColor: '#333', fontSize: 50, position: 'top' },
+                { bgColor: '#ffe66d', textColor: '#333', fontSize: 46, position: 'center' }
+            ];
+            
+            styles.forEach((style, index) => {
+                const thumbnailItem = createThumbnailElement(thumbnailText, style, ratio, index);
+                thumbnailsGrid.appendChild(thumbnailItem);
+            });
+            
+            // Update date info
+            updateGeneratedInfo();
+            
+            // Save to history
+            saveToHistory(thumbnailsGrid.innerHTML);
+            
+            // Scroll to result area
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 创建缩略图元素
+        function createThumbnailElement(text, style, ratio, index) {
+            const div = document.createElement('div');
+            div.className = 'thumbnail-item';
+            
+            // Set aspect ratio based on selected ratio
+            const aspectRatios = {
+                '16:9': '16/9',
+                '9:16': '9/16',
+                '4:3': '4/3',
+                '3:4': '3/4'
+            };
+            div.style.aspectRatio = aspectRatios[ratio] || '16/9';
+            
+            const imgSrc = generateThumbnailImage(text, style, ratio);
+            
+            div.innerHTML = `
+                <img src="${imgSrc}" class="thumbnail-image" alt="Thumbnail ${index + 1}">
+                <div class="thumbnail-overlay"></div>
+                <div class="thumbnail-actions">
+                    <button class="thumb-btn" onclick="downloadSingle(${index})" title="Download">⬇️</button>
+                    <button class="thumb-btn" onclick="editThumbnail(${index})" title="Edit">✏️</button>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        // 生成缩略图图像
+        function generateThumbnailImage(text, style, ratio) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions based on ratio
+            const dimensions = {
+                '16:9': { width: 1280, height: 720 },
+                '9:16': { width: 720, height: 1280 },
+                '4:3': { width: 1024, height: 768 },
+                '3:4': { width: 810, height: 1080 }
+            };
+            
+            const dim = dimensions[ratio] || dimensions['16:9'];
+            canvas.width = dim.width;
+            canvas.height = dim.height;
+            
+            // Draw background
+            ctx.fillStyle = style.bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add some decorative elements
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(
+                    Math.random() * canvas.width,
+                    Math.random() * canvas.height,
+                    Math.random() * 100 + 50,
+                    0, 2 * Math.PI
+                );
+                ctx.fill();
+            }
+            
+            // Add text
+            ctx.fillStyle = style.textColor;
+            ctx.font = `bold ${style.fontSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Calculate text position
+            let yPosition;
+            switch(style.position) {
+                case 'top':
+                    yPosition = canvas.height * 0.25;
+                    break;
+                case 'center':
+                    yPosition = canvas.height * 0.5;
+                    break;
+                case 'bottom':
+                    yPosition = canvas.height * 0.75;
+                    break;
+            }
+            
+            // Split text into lines
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = '';
+            const maxWidth = canvas.width * 0.8;
+            
+            for (let word of words) {
+                const testLine = currentLine + word + ' ';
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && currentLine) {
+                    lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            lines.push(currentLine.trim());
+            
+            // Draw text lines
+            const lineHeight = style.fontSize * 1.2;
+            const startY = yPosition - (lines.length - 1) * lineHeight / 2;
+            
+            // Add text shadow
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 3;
+            
+            lines.forEach((line, i) => {
+                ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
+            });
+            
+            return canvas.toDataURL('image/png');
+        }
+
+        // 更新生成信息
+        function updateGeneratedInfo() {
+            const today = new Date();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const day = today.getDate().toString().padStart(2, '0');
+            const year = today.getFullYear();
+            document.getElementById('generatedDate').textContent = `${month}/${day}/${year}`;
+        }
+
+        // 保存到历史记录
+        let generationHistory = [];
+        
+        function saveToHistory(thumbnailsHTML) {
+            const historyItem = {
+                date: new Date().toISOString(),
+                thumbnails: thumbnailsHTML
+            };
+            
+            generationHistory.unshift(historyItem);
+            
+            // Keep only last 10 generations
+            if (generationHistory.length > 10) {
+                generationHistory = generationHistory.slice(0, 10);
+            }
+            
+            // Save to localStorage (optional)
+            try {
+                localStorage.setItem('thumbnailHistory', JSON.stringify(generationHistory));
+            } catch(e) {
+                console.log('Could not save to localStorage');
+            }
+        }
+
+        // 显示历史记录
+        function showHistory() {
+            const modal = document.getElementById('historyModal');
+            const historyList = document.getElementById('historyList');
+            
+            modal.style.display = 'flex';
+            
+            // Load history from localStorage if available
+            try {
+                const saved = localStorage.getItem('thumbnailHistory');
+                if (saved) {
+                    generationHistory = JSON.parse(saved);
+                }
+            } catch(e) {
+                console.log('Could not load from localStorage');
+            }
+            
+            // Display history
+            historyList.innerHTML = '';
+            
+            if (generationHistory.length === 0) {
+                historyList.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8;">No history yet</div>';
+            } else {
+                // Group by date
+                const grouped = {};
+                generationHistory.forEach(item => {
+                    const date = new Date(item.date).toLocaleDateString();
+                    if (!grouped[date]) {
+                        grouped[date] = [];
+                    }
+                    grouped[date].push(item);
+                });
+                
+                // Display grouped history
+                for (const [date, items] of Object.entries(grouped)) {
+                    const group = document.createElement('div');
+                    group.className = 'history-group';
+                    group.innerHTML = `
+                        <div class="history-date">${date}</div>
+                        <div class="history-thumbnails">
+                            ${items.map(item => item.thumbnails).join('')}
+                        </div>
+                    `;
+                    historyList.appendChild(group);
+                }
+            }
+        }
+
+        // 关闭历史记录
+        function closeHistory() {
+            document.getElementById('historyModal').style.display = 'none';
+        }
+
+        // 下载单个缩略图
+        function downloadSingle(index) {
+            const thumbnails = document.querySelectorAll('.thumbnail-image');
+            if (thumbnails[index]) {
+                const link = document.createElement('a');
+                link.download = `thumbnail_${index + 1}_${Date.now()}.png`;
+                link.href = thumbnails[index].src;
+                link.click();
+            }
+        }
+
+        // 下载所有缩略图
+        function downloadAllThumbnails() {
+            const thumbnails = document.querySelectorAll('.thumbnail-image');
+            thumbnails.forEach((thumb, index) => {
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.download = `thumbnail_${index + 1}_${Date.now()}.png`;
+                    link.href = thumb.src;
+                    link.click();
+                }, index * 200);
+            });
+        }
+
+        // 编辑缩略图
+        function editThumbnail(index) {
+            alert(`Edit functionality for thumbnail ${index + 1} - Coming soon!`);
+        }
+
+        // 重新生成缩略图
+        function regenerateThumbnails() {
+            resetProcessingState();
+            startGenerating();
+        }
+
+        // 清空缩略图
+        function clearThumbnails() {
+            const thumbnailsGrid = document.getElementById('thumbnailsGrid');
+            const emptyState = document.getElementById('emptyState');
+            const resultActions = document.getElementById('resultActions');
+            
+            // Clear thumbnails
+            const existingThumbs = thumbnailsGrid.querySelectorAll('.thumbnail-item');
+            existingThumbs.forEach(thumb => thumb.remove());
+            
+            // Show empty state
+            if (emptyState) {
+                emptyState.style.display = 'flex';
+            } else {
+                // Create empty state if it doesn't exist
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'empty-state';
+                emptyDiv.id = 'emptyState';
+                emptyDiv.innerHTML = `
+                    <div style="font-size: 48px; margin-bottom: 15px;">🎨</div>
+                    <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No thumbnails yet</div>
+                    <div style="color: #64748b;">Upload media and click "Generate Thumbnail" to see results here</div>
+                `;
+                thumbnailsGrid.appendChild(emptyDiv);
+            }
+            
+            resultActions.style.display = 'none';
+        }
+
+        // 下载缩略图
+        function downloadThumbnails() {
+            downloadAllThumbnails();
+        }
+    </script>
+</body>
+</html>

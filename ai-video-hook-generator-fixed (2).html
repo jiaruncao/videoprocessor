@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Hook Generator - User Dashboard</title>
+    <style>
+        /* Global styles - reused from watermark remover.html */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar styles - reused from watermark remover.html */
+        .sidebar {
+            width: 260px;
+            background: #1a1d23;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px;
+        }
+
+        .logo::before {
+            content: '🎬';
+            font-size: 30px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #8b92a5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 70%;
+            background: white;
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* Main content area - reused from watermark remover.html */
+        .main-container {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #f8f9fb;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Title area - reused from watermark remover.html */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        /* Workspace layout - reused from watermark remover.html */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .workspace-left, .workspace-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Common container styles - reused from watermark remover.html */
+        .upload-container, .samples-container, .settings-container, .actions-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        /* Hook script input area */
+        .script-input-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            background: #fafbfc;
+            transition: all 0.3s ease;
+            min-height: 150px;
+        }
+
+        .script-input-area:focus-within {
+            border-color: #6366f1;
+            background: #f1f3ff;
+        }
+
+        .script-textarea {
+            width: 100%;
+            min-height: 120px;
+            border: none;
+            background: transparent;
+            resize: vertical;
+            outline: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1e293b;
+        }
+
+        .script-textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        .char-counter {
+            text-align: right;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        /* Sample button */
+        .sample-btn {
+            background: #f1f3ff;
+            border: 2px solid #6366f1;
+            color: #6366f1;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .sample-btn:hover {
+            background: #6366f1;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Voice selection area */
+        .voice-selector {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            background: #fafbfc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .voice-selector:hover {
+            border-color: #6366f1;
+            background: #f1f3ff;
+        }
+
+        .voice-selector-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .voice-selector-icon {
+            color: #6366f1;
+        }
+
+        /* Style selection area - reusing voice selector styles */
+        .style-selector {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            background: #fafbfc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .style-selector:hover {
+            border-color: #6366f1;
+            background: #f1f3ff;
+        }
+
+        .style-selector-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .style-selector-icon {
+            color: #6366f1;
+        }
+
+        /* Style grid in modal */
+        .style-grid-modal {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .style-item-modal {
+            position: relative;
+            cursor: pointer;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            background: #1a1d23;
+            aspect-ratio: 9/16;
+            min-height: 200px;
+        }
+
+        .style-item-modal:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .style-item-modal.selected {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Avatar selection area */
+        .avatar-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .avatar-btn {
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fafbfc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .avatar-btn:hover {
+            border-color: #6366f1;
+            background: #f1f3ff;
+            transform: translateY(-2px);
+        }
+
+        /* Hook Style selection - new styles */
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .style-item {
+            position: relative;
+            cursor: pointer;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            background: #1a1d23;
+            aspect-ratio: 9/16;
+            min-height: 200px;
+        }
+
+        .style-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .style-item.selected {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .style-thumbnail {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 15px;
+        }
+
+        /* Simulated character image backgrounds */
+        .style-thumbnail.no-style {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .style-thumbnail.thermal {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .style-thumbnail.blazing {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .style-thumbnail.pulse {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .style-thumbnail.clean {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .style-thumbnail.yellow {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+
+        .style-thumbnail.glow {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .style-thumbnail.hyper {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .style-thumbnail.aurum {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+        }
+
+        .style-thumbnail.retro {
+            background: linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%);
+        }
+
+        .style-thumbnail.coral {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+
+        .style-thumbnail.orange {
+            background: linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%);
+        }
+
+        .style-text-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .style-text {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .style-label {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1d23;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* Avatar placeholder */
+        .style-avatar {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        /* Effect selection */
+        .effect-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .effect-item {
+            position: relative;
+            cursor: pointer;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .effect-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .effect-item.selected {
+            border-color: #6366f1;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .effect-thumbnail {
+            width: 100%;
+            height: 120px;
+            background: #1a1d23;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .effect-label {
+            padding: 8px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        /* Hook Style container folding styles */
+        .style-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .style-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .style-toggle {
+            background: #f1f3ff;
+            border: 1px solid #6366f1;
+            color: #6366f1;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .style-toggle:hover {
+            background: #6366f1;
+            color: white;
+        }
+
+        /* Action buttons - reused from watermark remover.html */
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .action-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-generate:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-upload {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-upload:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-icon {
+            font-size: 20px;
+        }
+
+        /* Processing status - reused from watermark remover.html */
+        .process-info {
+            padding: 20px;
+            background: #f8f9fb;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .process-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .status-icon {
+            font-size: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            flex: 1;
+            font-size: 14px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .status-percent {
+            font-size: 16px;
+            color: #6366f1;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Generated result display area */
+        .result-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .result-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .result-subtitle {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .result-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            background: #f8f9fb;
+            border-radius: 16px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .result-placeholder {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .result-placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .result-placeholder-text {
+            font-size: 20px;
+            color: #475569;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .result-placeholder-hint {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        /* Video player styles */
+        .video-player {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .video-player video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Tab switching styles */
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: #f8f9fb;
+            padding: 8px;
+            border-radius: 50px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tab-btn {
+            padding: 10px 30px;
+            border: none;
+            border-radius: 50px;
+            background: transparent;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #6366f1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: #475569;
+        }
+
+        /* Upload video area */
+        .upload-video-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 60px 40px;
+            background: #fafbfc;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-video-area:hover {
+            border-color: #6366f1;
+            background: #f1f3ff;
+        }
+
+        /* Modal overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        /* Modal container */
+        .modal-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .modal-close {
+            background: #f1f3ff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            color: #6366f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: #6366f1;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        /* Voice selection list */
+        .voice-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .voice-item {
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fafbfc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .voice-item:hover {
+            border-color: #6366f1;
+            background: #f1f3ff;
+            transform: translateX(5px);
+        }
+
+        .voice-item.selected {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+        }
+
+        .voice-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .voice-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .voice-details {
+            text-align: left;
+        }
+
+        .voice-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .voice-type {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .voice-play {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Avatar selection grid */
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .avatar-card {
+            position: relative;
+            cursor: pointer;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            aspect-ratio: 9/16;
+            min-height: 180px;
+        }
+
+        .avatar-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .avatar-card.selected {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .avatar-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            color: #1e293b;
+        }
+
+        /* Avatar background selection styles */
+        .bg-option {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bg-option:hover {
+            transform: scale(1.05);
+        }
+
+        .bg-preview {
+            aspect-ratio: 9/16;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 240px;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .bg-option:hover .bg-preview {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .avatar-preview-icon {
+            font-size: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .bg-label {
+            text-align: center;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* Custom upload section */
+        .custom-upload-section {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .custom-upload-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            background: #fafbfc;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .custom-upload-area:hover {
+            border-color: #6366f1;
+            background: #f1f3ff;
+        }
+
+        .custom-upload-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #6366f1;
+        }
+
+        .custom-upload-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .custom-upload-hint {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .upload-video-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #6366f1;
+        }
+
+        .upload-video-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .upload-video-subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .upload-video-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .upload-video-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Responsive design - reused from watermark remover.html */
+        @media (max-width: 1200px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .effect-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .effect-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-container {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .avatar-options {
+                grid-template-columns: 1fr;
+            }
+
+            .effect-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">MediaEnhance Pro</div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <span>📊</span> Dashboard
+                </li>
+                <li class="nav-item">
+                    <span>✨</span> Video/Image Enhancer
+                </li>
+                <li class="nav-item">
+                    <span>🧹</span> Watermark Remover
+                </li>
+                <li class="nav-item active">
+                    <span>🎯</span> AI Hook Generator
+                </li>
+                <li class="nav-item">
+                    <span>🎨</span> Style Transfer
+                </li>
+                <li class="nav-item">
+                    <span>🔊</span> Audio Enhancement
+                </li>
+                <li class="nav-item">
+                    <span>📁</span> My Projects
+                </li>
+                <li class="nav-item">
+                    <span>⚙️</span> Settings
+                </li>
+            </ul>
+        </nav>
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: auto;">
+            <div class="nav-item" style="background: rgba(255,255,255,0.05); padding: 12px 18px;">
+                <span>👤</span>
+                <div style="flex: 1;">
+                    <div style="color: white; font-size: 14px; font-weight: 600;">User Account</div>
+                    <div style="color: #8b92a5; font-size: 12px; margin-top: 2px;">Pro Plan</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main content area -->
+    <main class="main-container">
+        <div class="content-wrapper">
+            <!-- Title area -->
+            <div class="header">
+                <h1>AI Video Hook Generator</h1>
+                <p>Create engaging video hooks that capture attention in the first 3 seconds. Use AI to generate compelling scripts and match them with perfect avatars and effects.</p>
+            </div>
+
+            <!-- Tab switching -->
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('generate')">Generate Video</button>
+                <button class="tab-btn" onclick="switchTab('upload')">Upload Video</button>
+            </div>
+
+            <!-- Generate video workspace -->
+            <div id="generateTab" class="workspace">
+                <!-- Left side: Script input and Voice selection -->
+                <div class="workspace-left">
+                    <!-- Hook script input -->
+                    <div class="upload-container">
+                        <div class="section-title">Hook Script</div>
+                        <div class="script-input-area">
+                            <textarea 
+                                class="script-textarea" 
+                                id="hookScript"
+                                placeholder="Enter your hook script here - English supported&#10;&#10;Example: 'Did you know that 90% of viewers decide to keep watching in the first 3 seconds? Here's how to hook them instantly...'"
+                                oninput="updateCharCount()"
+                            ></textarea>
+                            <div class="char-counter">
+                                <span id="charCount">0</span>/240
+                            </div>
+                        </div>
+                        <button class="sample-btn" onclick="useSampleScript()">
+                            Use Sample Script
+                        </button>
+                    </div>
+
+                    <!-- Voice selection -->
+                    <div class="samples-container">
+                        <div class="section-title">Voice</div>
+                        <div class="voice-selector" onclick="openVoiceSelector()">
+                            <div class="voice-selector-text">
+                                <span class="voice-selector-icon">➕</span>
+                                <span id="selectedVoice">Choose Voice</span>
+                            </div>
+                            <span>▶</span>
+                        </div>
+                    </div>
+
+                    <!-- Avatar selection -->
+                    <div class="samples-container">
+                        <div class="section-title">Avatar</div>
+                        <div class="avatar-options">
+                            <button class="avatar-btn" onclick="selectAvatar('library')">
+                                <span>👤</span>
+                                <span>Choose Avatar</span>
+                            </button>
+                            <button class="avatar-btn" onclick="selectAvatar('custom')">
+                                <span>➕</span>
+                                <span>Custom Avatar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right side: Hook Style selection, Effect selection and Action buttons -->
+                <div class="workspace-right">
+                    <!-- Hook Style selection - simplified -->
+                    <div class="settings-container">
+                        <div class="section-title">Hook Style</div>
+                        <div class="style-selector" onclick="openStyleModal('generate')">
+                            <div class="style-selector-text">
+                                <span class="style-selector-icon">🎨</span>
+                                <span id="selectedGenerateStyle">Clean Look</span>
+                            </div>
+                            <span>▶</span>
+                        </div>
+                    </div>
+
+                    <!-- Effect selection -->
+                    <div class="settings-container">
+                        <div class="section-title">Effect</div>
+                        <div class="effect-grid">
+                            <div class="effect-item selected" onclick="selectEffect('none', this)">
+                                <div class="effect-thumbnail">🚫</div>
+                                <div class="effect-label">No Effect</div>
+                            </div>
+                            <div class="effect-item" onclick="selectEffect('fire', this)">
+                                <div class="effect-thumbnail">🔥</div>
+                                <div class="effect-label">Fire Hands</div>
+                            </div>
+                            <div class="effect-item" onclick="selectEffect('claw', this)">
+                                <div class="effect-thumbnail">🦾</div>
+                                <div class="effect-label">Claw Grab</div>
+                            </div>
+                            <div class="effect-item" onclick="selectEffect('earth', this)">
+                                <div class="effect-thumbnail">🌍</div>
+                                <div class="effect-label">Earth Zoom</div>
+                            </div>
+                            <div class="effect-item" onclick="selectEffect('lightning', this)">
+                                <div class="effect-thumbnail">⚡</div>
+                                <div class="effect-label">Lightning</div>
+                            </div>
+                            <div class="effect-item" onclick="selectEffect('sparkle', this)">
+                                <div class="effect-thumbnail">✨</div>
+                                <div class="effect-label">Sparkles</div>
+                            </div>
+                            <div class="effect-item" onclick="selectEffect('neon', this)">
+                                <div class="effect-thumbnail">💫</div>
+                                <div class="effect-label">Neon Glow</div>
+                            </div>
+                            <div class="effect-item" onclick="selectEffect('glitch', this)">
+                                <div class="effect-thumbnail">📺</div>
+                                <div class="effect-label">Glitch</div>
+                            </div>
+                            <div class="effect-item" onclick="selectEffect('smoke', this)">
+                                <div class="effect-thumbnail">💨</div>
+                                <div class="effect-label">Smoke</div>
+                            </div>
+                            <div class="effect-item" onclick="selectEffect('rainbow', this)">
+                                <div class="effect-thumbnail">🌈</div>
+                                <div class="effect-label">Rainbow</div>
+                            </div>
+                            <div class="effect-item" onclick="selectEffect('freeze', this)">
+                                <div class="effect-thumbnail">❄️</div>
+                                <div class="effect-label">Freeze</div>
+                            </div>
+                            <div class="effect-item" onclick="selectEffect('burst', this)">
+                                <div class="effect-thumbnail">💥</div>
+                                <div class="effect-label">Energy Burst</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="actions-container">
+                        <button class="action-btn btn-generate" id="generateBtn" onclick="startGeneration()">
+                            <span class="btn-icon">🚀</span>
+                            <span id="btnText">Generate UGC Hook</span>
+                        </button>
+                        <button class="action-btn btn-upload" id="downloadBtn" style="display: none;" onclick="downloadVideo()">
+                            <span class="btn-icon">⬇️</span>
+                            Download Video
+                        </button>
+                        <div class="process-info" id="processInfo" style="display: none;">
+                            <div class="process-status">
+                                <div class="status-icon">⏳</div>
+                                <div class="status-text">Generating your video hook...</div>
+                                <div class="status-percent" id="processPercent">0%</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload video workspace -->
+            <div id="uploadTab" class="workspace" style="display: none;">
+                <div style="width: 100%;">
+                    <!-- Upload video area -->
+                    <div class="upload-container">
+                        <div class="section-title">Your Video</div>
+                        <div class="upload-video-area" onclick="triggerVideoUpload(event)">
+                            <div class="upload-video-icon">⬆️</div>
+                            <div class="upload-video-title">Upload Your Video</div>
+                            <div class="upload-video-subtitle">Drop your video file here or click to browse</div>
+                            <div class="upload-video-subtitle" style="margin-top: 10px; font-size: 12px; color: #94a3b8;">
+                                For best results, upload:
+                                <br>1. Talking Video
+                                <br>2. English-speaking One
+                            </div>
+                            <button class="upload-video-btn" onclick="event.stopPropagation(); document.getElementById('videoInput').click();">Choose Video File</button>
+                            <input type="file" id="videoInput" class="file-input" accept="video/*" onchange="handleVideoUpload(event)">
+                        </div>
+                    </div>
+                    
+                    <!-- Hook Style selection (also available for upload video) -->
+                    <div class="settings-container" style="margin-top: 20px;">
+                        <div class="section-title">Apply Hook Style</div>
+                        <div class="style-selector" onclick="openStyleModal('upload')">
+                            <div class="style-selector-text">
+                                <span class="style-selector-icon">🎨</span>
+                                <span id="selectedUploadStyle">Clean Look</span>
+                            </div>
+                            <span>▶</span>
+                        </div>
+                    </div>
+
+                    <!-- Effect selection (also available for upload video) -->
+                    <div class="settings-container" style="margin-top: 20px;">
+                        <div class="section-title">Apply Effect</div>
+                        <div class="effect-grid">
+                            <div class="effect-item selected" onclick="selectUploadEffect('none', this)">
+                                <div class="effect-thumbnail">🚫</div>
+                                <div class="effect-label">No Effect</div>
+                            </div>
+                            <div class="effect-item" onclick="selectUploadEffect('fire', this)">
+                                <div class="effect-thumbnail">🔥</div>
+                                <div class="effect-label">Fire Hands</div>
+                            </div>
+                            <div class="effect-item" onclick="selectUploadEffect('claw', this)">
+                                <div class="effect-thumbnail">🦾</div>
+                                <div class="effect-label">Claw Grab</div>
+                            </div>
+                            <div class="effect-item" onclick="selectUploadEffect('earth', this)">
+                                <div class="effect-thumbnail">🌍</div>
+                                <div class="effect-label">Earth Zoom</div>
+                            </div>
+                            <div class="effect-item" onclick="selectUploadEffect('lightning', this)">
+                                <div class="effect-thumbnail">⚡</div>
+                                <div class="effect-label">Lightning</div>
+                            </div>
+                            <div class="effect-item" onclick="selectUploadEffect('sparkle', this)">
+                                <div class="effect-thumbnail">✨</div>
+                                <div class="effect-label">Sparkles</div>
+                            </div>
+                            <div class="effect-item" onclick="selectUploadEffect('neon', this)">
+                                <div class="effect-thumbnail">💫</div>
+                                <div class="effect-label">Neon Glow</div>
+                            </div>
+                            <div class="effect-item" onclick="selectUploadEffect('glitch', this)">
+                                <div class="effect-thumbnail">📺</div>
+                                <div class="effect-label">Glitch</div>
+                            </div>
+                            <div class="effect-item" onclick="selectUploadEffect('smoke', this)">
+                                <div class="effect-thumbnail">💨</div>
+                                <div class="effect-label">Smoke</div>
+                            </div>
+                            <div class="effect-item" onclick="selectUploadEffect('rainbow', this)">
+                                <div class="effect-thumbnail">🌈</div>
+                                <div class="effect-label">Rainbow</div>
+                            </div>
+                            <div class="effect-item" onclick="selectUploadEffect('freeze', this)">
+                                <div class="effect-thumbnail">❄️</div>
+                                <div class="effect-label">Freeze</div>
+                            </div>
+                            <div class="effect-item" onclick="selectUploadEffect('burst', this)">
+                                <div class="effect-thumbnail">💥</div>
+                                <div class="effect-label">Energy Burst</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Processing button -->
+                    <div class="actions-container" style="margin-top: 20px;">
+                        <button class="action-btn btn-generate" id="processUploadBtn" onclick="processUploadedVideo()">
+                            <span class="btn-icon">🎯</span>
+                            <span>Apply Hook Style</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generated result display area -->
+            <div class="result-section" id="resultSection">
+                <div class="result-header">
+                    <h2 class="result-title">Your Generated Hooks</h2>
+                    <p class="result-subtitle">Your AI-powered video hooks will appear here</p>
+                </div>
+                <div class="result-container">
+                    <div class="result-placeholder" id="resultPlaceholder">
+                        <div class="result-placeholder-icon">📦</div>
+                        <div class="result-placeholder-text">Your generated video hooks will appear here.</div>
+                        <div class="result-placeholder-hint">Create your first hook to see the magic!</div>
+                    </div>
+                    <div class="video-player" id="videoPlayer" style="display: none;">
+                        <video id="generatedVideo" controls></video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Voice selection modal -->
+    <div class="modal-overlay" id="voiceModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Choose Voice</h3>
+                <button class="modal-close" onclick="closeVoiceModal()">✕</button>
+            </div>
+            <div class="voice-list">
+                <div class="voice-item" onclick="selectVoice('Emily', 'Female', 'American', this)">
+                    <div class="voice-info">
+                        <div class="voice-avatar">👩</div>
+                        <div class="voice-details">
+                            <div class="voice-name">Emily</div>
+                            <div class="voice-type">Female • American</div>
+                        </div>
+                    </div>
+                    <div class="voice-play">▶</div>
+                </div>
+                <div class="voice-item" onclick="selectVoice('James', 'Male', 'British', this)">
+                    <div class="voice-info">
+                        <div class="voice-avatar">👨</div>
+                        <div class="voice-details">
+                            <div class="voice-name">James</div>
+                            <div class="voice-type">Male • British</div>
+                        </div>
+                    </div>
+                    <div class="voice-play">▶</div>
+                </div>
+                <div class="voice-item" onclick="selectVoice('Sophia', 'Female', 'Australian', this)">
+                    <div class="voice-info">
+                        <div class="voice-avatar">👩‍💼</div>
+                        <div class="voice-details">
+                            <div class="voice-name">Sophia</div>
+                            <div class="voice-type">Female • Australian</div>
+                        </div>
+                    </div>
+                    <div class="voice-play">▶</div>
+                </div>
+                <div class="voice-item" onclick="selectVoice('Michael', 'Male', 'American', this)">
+                    <div class="voice-info">
+                        <div class="voice-avatar">👨‍💼</div>
+                        <div class="voice-details">
+                            <div class="voice-name">Michael</div>
+                            <div class="voice-type">Male • American</div>
+                        </div>
+                    </div>
+                    <div class="voice-play">▶</div>
+                </div>
+                <div class="voice-item" onclick="selectVoice('Aria', 'Female', 'Canadian', this)">
+                    <div class="voice-info">
+                        <div class="voice-avatar">👩‍🎤</div>
+                        <div class="voice-details">
+                            <div class="voice-name">Aria</div>
+                            <div class="voice-type">Female • Canadian</div>
+                        </div>
+                    </div>
+                    <div class="voice-play">▶</div>
+                </div>
+                <div class="voice-item" onclick="selectVoice('AI Voice Pro', 'Neutral', 'Premium', this)">
+                    <div class="voice-info">
+                        <div class="voice-avatar">🤖</div>
+                        <div class="voice-details">
+                            <div class="voice-name">AI Voice Pro</div>
+                            <div class="voice-type">Neutral • Premium</div>
+                        </div>
+                    </div>
+                    <div class="voice-play">▶</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avatar selection modal -->
+    <div class="modal-overlay" id="avatarModal">
+        <div class="modal-container" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Choose Avatar</h3>
+                <button class="modal-close" onclick="closeAvatarModal()">✕</button>
+            </div>
+            <div class="avatar-grid">
+                <div class="avatar-card" onclick="openAvatarBackgrounds('Professional Woman', '👩‍💼', this)">
+                    <div class="avatar-image">👩‍💼</div>
+                    <div class="avatar-name">Professional Woman</div>
+                </div>
+                <div class="avatar-card" onclick="openAvatarBackgrounds('Professional Man', '👨‍💼', this)">
+                    <div class="avatar-image">👨‍💼</div>
+                    <div class="avatar-name">Professional Man</div>
+                </div>
+                <div class="avatar-card" onclick="openAvatarBackgrounds('Casual Woman', '👩', this)">
+                    <div class="avatar-image">👩</div>
+                    <div class="avatar-name">Casual Woman</div>
+                </div>
+                <div class="avatar-card" onclick="openAvatarBackgrounds('Casual Man', '👨', this)">
+                    <div class="avatar-image">👨</div>
+                    <div class="avatar-name">Casual Man</div>
+                </div>
+                <div class="avatar-card" onclick="openAvatarBackgrounds('Creative Woman', '👩‍🎨', this)">
+                    <div class="avatar-image">👩‍🎨</div>
+                    <div class="avatar-name">Creative Woman</div>
+                </div>
+                <div class="avatar-card" onclick="openAvatarBackgrounds('Creative Man', '👨‍🎨', this)">
+                    <div class="avatar-image">👨‍🎨</div>
+                    <div class="avatar-name">Creative Man</div>
+                </div>
+                <div class="avatar-card" onclick="openAvatarBackgrounds('Tech Expert Woman', '👩‍💻', this)">
+                    <div class="avatar-image">👩‍💻</div>
+                    <div class="avatar-name">Tech Expert Woman</div>
+                </div>
+                <div class="avatar-card" onclick="openAvatarBackgrounds('Tech Expert Man', '👨‍💻', this)">
+                    <div class="avatar-image">👨‍💻</div>
+                    <div class="avatar-name">Tech Expert Man</div>
+                </div>
+                <div class="avatar-card" onclick="openAvatarBackgrounds('Fitness Coach', '🏋️', this)">
+                    <div class="avatar-image">🏋️</div>
+                    <div class="avatar-name">Fitness Coach</div>
+                </div>
+            </div>
+            <div class="custom-upload-section">
+                <div class="section-title" style="margin-bottom: 15px;">Or Upload Custom Avatar</div>
+                <div class="custom-upload-area" onclick="document.getElementById('avatarInput').click()">
+                    <div class="custom-upload-icon">📸</div>
+                    <div class="custom-upload-text">Upload Your Photo</div>
+                    <div class="custom-upload-hint">JPG, PNG up to 10MB</div>
+                    <input type="file" id="avatarInput" class="file-input" accept="image/*" onchange="handleAvatarUpload(event)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avatar Background Selection Modal -->
+    <div class="modal-overlay" id="avatarBgModal">
+        <div class="modal-container" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Choose Background for <span id="selectedAvatarName"></span></h3>
+                <button class="modal-close" onclick="closeAvatarBgModal()">✕</button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                <div class="bg-option" onclick="selectAvatarWithBg('office')">
+                    <div class="bg-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="avatar-preview-icon" id="bgAvatar1"></div>
+                    </div>
+                    <div class="bg-label">Modern Office</div>
+                </div>
+                <div class="bg-option" onclick="selectAvatarWithBg('studio')">
+                    <div class="bg-preview" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="avatar-preview-icon" id="bgAvatar2"></div>
+                    </div>
+                    <div class="bg-label">Creative Studio</div>
+                </div>
+                <div class="bg-option" onclick="selectAvatarWithBg('outdoor')">
+                    <div class="bg-preview" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <div class="avatar-preview-icon" id="bgAvatar3"></div>
+                    </div>
+                    <div class="bg-label">Outdoor Scene</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Style Selection Modal -->
+    <div class="modal-overlay" id="styleModal">
+        <div class="modal-container" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Choose Hook Style</h3>
+                <button class="modal-close" onclick="closeStyleModal()">✕</button>
+            </div>
+            <div class="style-grid-modal">
+                <!-- All 11 styles -->
+                <div class="style-item-modal" onclick="selectStyleFromModal('no-style', 'No Style', this)">
+                    <div class="style-thumbnail no-style">
+                        <div class="style-avatar">👤</div>
+                    </div>
+                    <div class="style-label">No Style</div>
+                </div>
+                <div class="style-item-modal" onclick="selectStyleFromModal('thermal', 'Thermal', this)">
+                    <div class="style-thumbnail thermal">
+                        <div class="style-text-overlay">
+                            <div class="style-text">AI Template's<br>MAGIC</div>
+                        </div>
+                    </div>
+                    <div class="style-label">Thermal</div>
+                </div>
+                <div class="style-item-modal" onclick="selectStyleFromModal('blazing', 'Blazing Red', this)">
+                    <div class="style-thumbnail blazing">
+                        <div class="style-text-overlay">
+                            <div class="style-text">AI Template's<br>Magic</div>
+                        </div>
+                    </div>
+                    <div class="style-label">Blazing Red</div>
+                </div>
+                <div class="style-item-modal" onclick="selectStyleFromModal('pulse', 'Pulse', this)">
+                    <div class="style-thumbnail pulse">
+                        <div class="style-text-overlay">
+                            <div class="style-text">AI TEMPLATE'S<br>MAGIC</div>
+                        </div>
+                    </div>
+                    <div class="style-label">Pulse</div>
+                </div>
+                <div class="style-item-modal selected" onclick="selectStyleFromModal('clean', 'Clean Look', this)">
+                    <div class="style-thumbnail clean">
+                        <div class="style-text-overlay">
+                            <div class="style-text">AI template's<br>magic</div>
+                        </div>
+                    </div>
+                    <div class="style-label">Clean Look</div>
+                </div>
+                <div class="style-item-modal" onclick="selectStyleFromModal('yellow', 'YellowLite', this)">
+                    <div class="style-thumbnail yellow">
+                        <div class="style-text-overlay">
+                            <div class="style-text">AI TEMPLATES<br>MAGIC</div>
+                        </div>
+                    </div>
+                    <div class="style-label">YellowLite</div>
+                </div>
+                <div class="style-item-modal" onclick="selectStyleFromModal('glow', 'GlowReel', this)">
+                    <div class="style-thumbnail glow">
+                        <div class="style-text-overlay">
+                            <div class="style-text">AI TEMPLATE'S<br>MAGIC</div>
+                        </div>
+                    </div>
+                    <div class="style-label">GlowReel</div>
+                </div>
+                <div class="style-item-modal" onclick="selectStyleFromModal('hyper', 'Hyper Green', this)">
+                    <div class="style-thumbnail hyper">
+                        <div class="style-text-overlay">
+                            <div class="style-text">AI TEMPLATES<br>MAGIC</div>
+                        </div>
+                    </div>
+                    <div class="style-label">Hyper Green</div>
+                </div>
+                <div class="style-item-modal" onclick="selectStyleFromModal('aurum', 'Aurum', this)">
+                    <div class="style-thumbnail aurum">
+                        <div class="style-text-overlay">
+                            <div class="style-text">HOW TO<br>EDIT FASTER</div>
+                        </div>
+                    </div>
+                    <div class="style-label">Aurum</div>
+                </div>
+                <div class="style-item-modal" onclick="selectStyleFromModal('coral', 'Coral Look', this)">
+                    <div class="style-thumbnail coral">
+                        <div class="style-text-overlay">
+                            <div class="style-text">AI TEMPLATE'S<br>MAGIC</div>
+                        </div>
+                    </div>
+                    <div class="style-label">Coral Look</div>
+                </div>
+                <div class="style-item-modal" onclick="selectStyleFromModal('orange', 'Orange Flicker', this)">
+                    <div class="style-thumbnail orange">
+                        <div class="style-text-overlay">
+                            <div class="style-text">AI EDIT'S<br>MAGIC</div>
+                        </div>
+                    </div>
+                    <div class="style-label">Orange Flicker</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedEffect = 'none';
+        let selectedStyle = 'clean';
+        let selectedUploadStyle = 'clean';
+        let selectedVoice = null;
+        let selectedAvatar = null;
+        let currentTab = 'generate';
+        let styleExpanded = false;
+
+        // Tab switching
+        function switchTab(tab) {
+            currentTab = tab;
+            const generateTab = document.getElementById('generateTab');
+            const uploadTab = document.getElementById('uploadTab');
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            
+            if (tab === 'generate') {
+                generateTab.style.display = 'grid';
+                uploadTab.style.display = 'none';
+                tabButtons[0].classList.add('active');
+                tabButtons[1].classList.remove('active');
+            } else {
+                generateTab.style.display = 'none';
+                uploadTab.style.display = 'flex';
+                tabButtons[0].classList.remove('active');
+                tabButtons[1].classList.add('active');
+            }
+        }
+
+        // Update character count
+        function updateCharCount() {
+            const script = document.getElementById('hookScript').value;
+            const charCount = document.getElementById('charCount');
+            charCount.textContent = script.length;
+            
+            if (script.length > 240) {
+                charCount.style.color = '#ef4444';
+            } else {
+                charCount.style.color = '#64748b';
+            }
+        }
+
+        // Use sample script
+        function useSampleScript() {
+            const sampleScripts = [
+                "Did you know that 90% of viewers decide to keep watching in the first 3 seconds? Here's the secret formula that top creators use...",
+                "Stop scrolling! I'm about to reveal the one trick that changed my entire content strategy forever...",
+                "This simple AI hack helped me get 10 million views in just 30 days. Want to know how?",
+                "Warning: What I'm about to show you will completely change how you create content..."
+            ];
+            
+            const randomScript = sampleScripts[Math.floor(Math.random() * sampleScripts.length)];
+            document.getElementById('hookScript').value = randomScript;
+            updateCharCount();
+        }
+
+        // Open Voice selector
+        function openVoiceSelector() {
+            document.getElementById('voiceModal').classList.add('active');
+        }
+
+        // Close Voice modal
+        function closeVoiceModal() {
+            document.getElementById('voiceModal').classList.remove('active');
+        }
+
+        // Select Voice
+        function selectVoice(name, gender, accent, element) {
+            // Remove all selected states
+            document.querySelectorAll('.voice-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            // Add selected state
+            element.classList.add('selected');
+            
+            // Update selected Voice
+            selectedVoice = `${name} (${gender})`;
+            document.getElementById('selectedVoice').textContent = selectedVoice;
+            
+            // Delay close modal
+            setTimeout(() => {
+                closeVoiceModal();
+            }, 300);
+        }
+
+        // Select Avatar
+        function selectAvatar(type) {
+            if (type === 'library') {
+                // Open Avatar library modal
+                document.getElementById('avatarModal').classList.add('active');
+            } else {
+                // Directly trigger file upload
+                document.getElementById('avatarModal').classList.add('active');
+                // Scroll to upload area
+                document.querySelector('.custom-upload-section').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Close Avatar modal
+        function closeAvatarModal() {
+            document.getElementById('avatarModal').classList.remove('active');
+        }
+
+        // Select Avatar from library
+        function selectAvatarFromLibrary(name, element) {
+            // Remove all selected states
+            document.querySelectorAll('.avatar-card').forEach(item => {
+                item.classList.remove('selected');
+            });
+            // Add selected state
+            element.classList.add('selected');
+            
+            // Update selected Avatar
+            selectedAvatar = name;
+            
+            // Delay close modal
+            setTimeout(() => {
+                closeAvatarModal();
+                // Update button text to show selected
+                document.querySelector('.avatar-btn').innerHTML = `<span>✔</span><span>${name}</span>`;
+            }, 300);
+        }
+
+        // Handle Avatar image upload
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File size exceeds 10MB limit');
+                    return;
+                }
+                
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Please upload an image file');
+                    return;
+                }
+                
+                // Read and display image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    selectedAvatar = 'Custom Avatar';
+                    closeAvatarModal();
+                    // Update button to show custom avatar uploaded
+                    document.querySelectorAll('.avatar-btn')[1].innerHTML = `<span>✔</span><span>Custom Avatar Uploaded</span>`;
+                    alert(`Avatar uploaded successfully: ${file.name}`);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Click mask layer to close modal
+        document.addEventListener('DOMContentLoaded', function() {
+            // Voice modal mask click to close
+            document.getElementById('voiceModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeVoiceModal();
+                }
+            });
+            
+            // Avatar modal mask click to close
+            document.getElementById('avatarModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeAvatarModal();
+                }
+            });
+            
+            // Avatar Background modal mask click to close
+            const bgModal = document.getElementById('avatarBgModal');
+            if (bgModal) {
+                bgModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeAvatarBgModal();
+                    }
+                });
+            }
+            
+            // Style modal mask click to close
+            const styleModal = document.getElementById('styleModal');
+            if (styleModal) {
+                styleModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeStyleModal();
+                    }
+                });
+            }
+        });
+
+        // Open Avatar Background Selection
+        function openAvatarBackgrounds(name, icon, element) {
+            // Store temporary avatar selection
+            window.tempAvatarName = name;
+            window.tempAvatarIcon = icon;
+            
+            // Update the modal title
+            document.getElementById('selectedAvatarName').textContent = name;
+            
+            // Update all background previews with the selected avatar icon
+            document.getElementById('bgAvatar1').textContent = icon;
+            document.getElementById('bgAvatar2').textContent = icon;
+            document.getElementById('bgAvatar3').textContent = icon;
+            
+            // Show background selection modal
+            document.getElementById('avatarBgModal').classList.add('active');
+            
+            // Mark element as temporarily selected
+            document.querySelectorAll('.avatar-card').forEach(item => {
+                item.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        // Close Avatar Background Modal
+        function closeAvatarBgModal() {
+            const modal = document.getElementById('avatarBgModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        // Select Avatar with Background
+        function selectAvatarWithBg(background) {
+            selectedAvatar = window.tempAvatarName;
+            window.selectedAvatarBg = background;
+            
+            // Close both modals
+            closeAvatarBgModal();
+            setTimeout(() => {
+                closeAvatarModal();
+                // Update button to show selection
+                const bgNames = {
+                    'office': 'Modern Office',
+                    'studio': 'Creative Studio',
+                    'outdoor': 'Outdoor Scene'
+                };
+                document.querySelector('.avatar-btn').innerHTML = `<span>✔</span><span>${window.tempAvatarName} - ${bgNames[background]}</span>`;
+            }, 300);
+        }
+
+        // Select Hook Style
+        function selectStyle(style, element) {
+            selectedStyle = style;
+            // This function is now deprecated in favor of modal selection
+        }
+
+        // Open Style Modal
+        function openStyleModal(tab) {
+            window.currentStyleTab = tab;
+            document.getElementById('styleModal').classList.add('active');
+            
+            // Mark currently selected style
+            const currentStyle = tab === 'generate' ? selectedStyle : window.selectedUploadStyle || 'clean';
+            document.querySelectorAll('.style-item-modal').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Find and select the current style
+            document.querySelectorAll('.style-item-modal').forEach(item => {
+                if (item.onclick.toString().includes(`'${currentStyle}'`)) {
+                    item.classList.add('selected');
+                }
+            });
+        }
+
+        // Close Style Modal
+        function closeStyleModal() {
+            document.getElementById('styleModal').classList.remove('active');
+        }
+
+        // Select Style from Modal
+        function selectStyleFromModal(styleId, styleName, element) {
+            // Remove all selected states
+            document.querySelectorAll('.style-item-modal').forEach(item => {
+                item.classList.remove('selected');
+            });
+            // Add selected state
+            element.classList.add('selected');
+            
+            // Update the appropriate selector based on which tab opened the modal
+            if (window.currentStyleTab === 'generate') {
+                selectedStyle = styleId;
+                document.getElementById('selectedGenerateStyle').textContent = styleName;
+            } else {
+                window.selectedUploadStyle = styleId;
+                document.getElementById('selectedUploadStyle').textContent = styleName;
+            }
+            
+            // Close modal after short delay
+            setTimeout(() => {
+                closeStyleModal();
+            }, 300);
+        }
+
+        // Toggle Style expand/collapse (deprecated)
+        function toggleStyleExpand() {
+            // This function is deprecated - now using modal instead
+        }
+
+        // Select effect
+        function selectEffect(effect, element) {
+            selectedEffect = effect;
+            // Remove all selected states
+            document.querySelectorAll('.effect-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            // Add selected state
+            element.classList.add('selected');
+        }
+
+        // Start generation
+        function startGeneration() {
+            const hookScript = document.getElementById('hookScript').value;
+            
+            // Validate input
+            if (!hookScript.trim()) {
+                alert('Please enter a hook script first!');
+                return;
+            }
+            
+            if (hookScript.length > 240) {
+                alert('Script is too long! Please keep it under 240 characters.');
+                return;
+            }
+            
+            if (!selectedVoice) {
+                alert('Please select a voice!');
+                return;
+            }
+
+            if (!selectedStyle) {
+                alert('Please select a hook style!');
+                return;
+            }
+            
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const processInfo = document.getElementById('processInfo');
+            const progressFill = document.getElementById('progressFill');
+            const processPercent = document.getElementById('processPercent');
+
+            // Show processing status
+            generateBtn.disabled = true;
+            processInfo.style.display = 'block';
+
+            console.log('Generating with:', {
+                script: hookScript,
+                voice: selectedVoice,
+                avatar: selectedAvatar,
+                style: selectedStyle,
+                effect: selectedEffect
+            });
+
+            // Simulate generation progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    // Generation complete
+                    setTimeout(() => {
+                        generateBtn.style.display = 'none';
+                        downloadBtn.style.display = 'block';
+                        processInfo.innerHTML = `
+                            <div style="text-align: center; padding: 20px;">
+                                <div style="font-size: 48px; margin-bottom: 10px;">✅</div>
+                                <div style="font-size: 16px; color: #10b981; font-weight: 600;">Video Hook Generated Successfully!</div>
+                                <div style="font-size: 14px; color: #64748b; margin-top: 5px;">Your engaging hook with ${selectedStyle} style is ready</div>
+                            </div>
+                        `;
+                        
+                        showGeneratedVideo();
+                    }, 500);
+                }
+                progressFill.style.width = progress + '%';
+                processPercent.textContent = Math.round(progress) + '%';
+            }, 200);
+        }
+
+        // Show generated video
+        function showGeneratedVideo() {
+            document.getElementById('resultPlaceholder').style.display = 'none';
+            document.getElementById('videoPlayer').style.display = 'block';
+            
+            // Simulate loading video
+            const video = document.getElementById('generatedVideo');
+            // In actual application, this should load the generated video
+            video.src = '#'; // Actual application should use generated video URL
+        }
+
+        // Trigger video upload
+        function triggerVideoUpload(event) {
+            // If not clicking button, trigger file selection
+            if (!event.target.classList.contains('upload-video-btn')) {
+                document.getElementById('videoInput').click();
+            }
+        }
+
+        // Handle video upload
+        function handleVideoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (file.size > 500 * 1024 * 1024) {
+                    alert('File size exceeds 500MB limit');
+                    return;
+                }
+                
+                // Validate file type
+                if (!file.type.startsWith('video/')) {
+                    alert('Please upload a video file');
+                    return;
+                }
+                
+                // Simulate processing uploaded video
+                const uploadArea = document.querySelector('.upload-video-area');
+                uploadArea.innerHTML = `
+                    <div style="color: #10b981; font-size: 48px; margin-bottom: 10px;">✔</div>
+                    <div style="font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 5px;">Video Uploaded Successfully</div>
+                    <div style="font-size: 14px; color: #64748b;">${file.name}</div>
+                    <button class="upload-video-btn" style="margin-top: 15px;" onclick="document.getElementById('videoInput').click(); event.stopPropagation();">Choose Another Video</button>
+                    <input type="file" id="videoInput" class="file-input" accept="video/*" onchange="handleVideoUpload(event)">
+                `;
+                
+                // Enable processing button
+                const processBtn = document.getElementById('processUploadBtn');
+                if (processBtn) {
+                    processBtn.disabled = false;
+                }
+                
+                console.log(`Video uploaded: ${file.name}`);
+            }
+        }
+
+        // Select upload video Style (deprecated)
+        function selectUploadStyle(style, element) {
+            // This function is deprecated - now using modal selection
+        }
+
+        // Select upload video Effect
+        function selectUploadEffect(effect, element) {
+            // Remove all selected states
+            const parent = element.closest('.effect-grid');
+            parent.querySelectorAll('.effect-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            // Add selected state
+            element.classList.add('selected');
+        }
+
+        // Toggle upload video Style expand/collapse (deprecated)
+        function toggleUploadStyleExpand() {
+            // This function is deprecated - now using modal instead
+        }
+
+        // Process uploaded video
+        function processUploadedVideo() {
+            const selectedUploadStyle = document.querySelector('#uploadStyleGrid .style-item.selected');
+            const selectedUploadEffect = document.querySelector('#uploadTab .effect-item.selected');
+            
+            if (!selectedUploadStyle) {
+                alert('Please select a Hook Style!');
+                return;
+            }
+            
+            // Simulate processing
+            alert(`Processing video with:\nStyle: ${selectedUploadStyle.querySelector('.style-label').textContent}\nEffect: ${selectedUploadEffect ? selectedUploadEffect.querySelector('.effect-label').textContent : 'None'}`);
+            
+            // Actual application should implement video processing logic
+        }
+
+        // Download video
+        function downloadVideo() {
+            alert('Downloading your video hook...');
+            // Actual application should implement download logic
+        }
+
+        // Reset processing state
+        function resetProcessingState() {
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const processInfo = document.getElementById('processInfo');
+            
+            generateBtn.style.display = 'block';
+            generateBtn.disabled = false;
+            downloadBtn.style.display = 'none';
+            processInfo.style.display = 'none';
+            
+            document.getElementById('btnText').textContent = 'Generate UGC Hook';
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            // Initialize first effect as selected
+            const firstEffect = document.querySelector('.effect-item');
+            if (firstEffect) {
+                firstEffect.classList.add('selected');
+            }
+            
+            // Clean Look selected by default (5th style item)
+            const cleanLookStyle = document.querySelectorAll('.style-item')[4];
+            if (cleanLookStyle) {
+                cleanLookStyle.classList.add('selected');
+            }
+            
+            // Upload Tab defaults
+            const uploadCleanLook = document.querySelectorAll('#uploadStyleGrid .style-item')[4];
+            if (uploadCleanLook) {
+                uploadCleanLook.classList.add('selected');
+            }
+            
+            const uploadFirstEffect = document.querySelector('#uploadTab .effect-item');
+            if (uploadFirstEffect) {
+                uploadFirstEffect.classList.add('selected');
+            }
+            
+            // Initially disable upload processing button
+            const processUploadBtn = document.getElementById('processUploadBtn');
+            if (processUploadBtn) {
+                processUploadBtn.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Ad Video Generator - User Dashboard</title>
+    <style>
+        /* 全局样式 - 复用自watermark remover */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* 侧边栏样式 - 复用自watermark remover */
+        .sidebar {
+            width: 260px;
+            background: #1a1d23;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px;
+        }
+
+        .logo::before {
+            content: '🎬';
+            font-size: 30px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #8b92a5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 70%;
+            background: white;
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* 主内容区域 - 复用自watermark remover */
+        .main-container {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #f8f9fb;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 标题区域 - 复用自watermark remover */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        /* 视频类型选择器 - 已删除 */
+
+        /* 模板选择区域 - 全新设计 */
+        .template-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section-title-large {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .section-subtitle {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        /* 分类标签 */
+        .template-categories {
+            margin-bottom: 30px;
+        }
+
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .category-tab {
+            padding: 10px 24px;
+            background: #f8f9fb;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            color: #64748b;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-tab:hover {
+            background: #f1f3ff;
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+
+        .category-tab.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-color: #6366f1;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* 模板网格 - 大尺寸 */
+        .template-grid-large {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .template-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 横版模板占据两列 */
+        .template-card.horizontal-template {
+            grid-column: span 2;
+        }
+
+        .template-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            border-color: #6366f1;
+        }
+
+        .template-card.selected {
+            border-color: #6366f1;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+        }
+
+        .template-preview-wrapper {
+            position: relative;
+            aspect-ratio: 9/16;
+            background: #000;
+            overflow: hidden;
+            min-height: 200px;
+        }
+
+        .horizontal-template .template-preview-wrapper {
+            aspect-ratio: 16/9;
+            min-height: 150px;
+        }
+
+        .template-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .template-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .template-card:hover .template-overlay {
+            opacity: 1;
+        }
+
+        .play-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #6366f1;
+        }
+
+        .template-info {
+            padding: 15px;
+            background: white;
+        }
+
+        .template-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .template-desc {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .template-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 8px;
+            background: #f1f3f5;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .tag.hot {
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            color: white;
+        }
+
+        .tag.new {
+            background: linear-gradient(135deg, #10b981, #14b8a6);
+            color: white;
+        }
+
+        .tag.trending {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+        }
+
+        /* 工作区布局 */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .workspace-left, .workspace-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 通用容器样式 - 复用自watermark remover */
+        .upload-container, .template-container, .settings-container, .actions-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        /* 通用容器样式 - 复用自watermark remover */
+        .upload-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            background: #fafbfc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-area:hover {
+            border-color: #6366f1;
+            background: #f1f3ff;
+        }
+
+        .upload-area.has-image {
+            border-color: #10b981;
+            background: white;
+            cursor: default;
+            padding: 10px;
+        }
+
+        .uploaded-image {
+            max-width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #6366f1;
+        }
+
+        .upload-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* 示例产品 */
+        .sample-products {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .sample-product {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .sample-product:hover {
+            transform: scale(1.1);
+            border-color: #6366f1;
+        }
+
+        .sample-product img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 运动文案输入 */
+        .motion-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .motion-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: #f8f9fb;
+        }
+
+        .motion-preset {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            padding: 6px 12px;
+            background: #f8f9fb;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .preset-btn:hover {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+
+        /* 生成按钮 */
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(168, 85, 247, 0.35);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .credit-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* 预览区域 */
+        .preview-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+        }
+
+        .preview-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .preview-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .preview-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            background: #000;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: #64748b;
+        }
+
+        .preview-placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .preview-video {
+            max-width: 100%;
+            max-height: 600px;
+            border-radius: 16px;
+        }
+
+        /* 处理状态 */
+        .process-info {
+            padding: 20px;
+            background: #f8f9fb;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .process-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .status-icon {
+            font-size: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            flex: 1;
+            font-size: 14px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .status-percent {
+            font-size: 16px;
+            color: #6366f1;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* 提示文字 */
+        .tip-box {
+            background: linear-gradient(135deg, #fef3c7, #fed7aa);
+            border: 1px solid #fbbf24;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #78350f;
+        }
+
+        .tip-box strong {
+            color: #ea580c;
+        }
+
+        /* 重置按钮 */
+        .reset-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #6366f1;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            color: #4f46e5;
+            transform: translateX(2px);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .template-grid-large {
+                grid-template-columns: repeat(3, 1fr);
+                max-height: 450px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-container {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .template-section {
+                padding: 25px;
+            }
+
+            .section-title-large {
+                font-size: 24px;
+            }
+
+            .template-grid-large {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            /* 移动端横版模板也占满宽度 */
+            .template-card.horizontal-template {
+                grid-column: span 2;
+            }
+
+            .category-tabs {
+                gap: 10px;
+            }
+
+            .category-tab {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            .sample-products {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="logo">MediaEnhance Pro</div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <span>📊</span> Dashboard
+                </li>
+                <li class="nav-item">
+                    <span>✨</span> Video/Image Enhancer
+                </li>
+                <li class="nav-item">
+                    <span>🧹</span> Watermark Remover
+                </li>
+                <li class="nav-item active">
+                    <span>🎯</span> AI Ad Generator
+                </li>
+                <li class="nav-item">
+                    <span>🎨</span> Style Transfer
+                </li>
+                <li class="nav-item">
+                    <span>🔊</span> Audio Enhancement
+                </li>
+                <li class="nav-item">
+                    <span>📁</span> My Projects
+                </li>
+                <li class="nav-item">
+                    <span>⚙️</span> Settings
+                </li>
+            </ul>
+        </nav>
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: auto;">
+            <div class="nav-item" style="background: rgba(255,255,255,0.05); padding: 12px 18px;">
+                <span>👤</span>
+                <div style="flex: 1;">
+                    <div style="color: white; font-size: 14px; font-weight: 600;">User Account</div>
+                    <div style="color: #8b92a5; font-size: 12px; margin-top: 2px;">Pro Plan</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="main-container">
+        <div class="content-wrapper">
+            <!-- 标题区域 -->
+            <div class="header">
+                <h1>AI Ad Video Generator</h1>
+                <p>Create stunning product advertisement videos using AI. Transform your product images into engaging TikTok, Instagram Reels, or YouTube Shorts in seconds.</p>
+            </div>
+
+            <!-- 模板选择区域 - 占满双栏 -->
+            <div class="template-section">
+                <div class="section-header">
+                    <h2 class="section-title-large">Choose Your Video Template</h2>
+                    <p class="section-subtitle">Select from our professionally designed templates for TikTok, Instagram Reels, or YouTube Shorts</p>
+                </div>
+                <div class="template-categories">
+                    <div class="category-tabs">
+                        <button class="category-tab active" onclick="filterTemplates('all')">All Templates</button>
+                        <button class="category-tab" onclick="filterTemplates('tiktok')">TikTok (9:16)</button>
+                        <button class="category-tab" onclick="filterTemplates('youtube')">YouTube (16:9)</button>
+                        <button class="category-tab" onclick="filterTemplates('trending')">🔥 Trending</button>
+                    </div>
+                </div>
+                <div class="template-grid-large" id="templateGrid">
+                    <!-- TikTok 竖版模板 -->
+                    <div class="template-card" data-category="tiktok trending" onclick="selectTemplate(this, 'unboxing')">
+                        <div class="template-preview-wrapper">
+                            <img class="template-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23ff69b4' width='9' height='16'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='white' font-size='2'>📦%3C/text%3E%3C/svg%3E" alt="Unboxing">
+                            <div class="template-overlay">
+                                <span class="play-icon">▶</span>
+                            </div>
+                        </div>
+                        <div class="template-info">
+                            <h3 class="template-name">Unboxing Experience</h3>
+                            <p class="template-desc">Perfect for product reveals</p>
+                            <div class="template-tags">
+                                <span class="tag">TikTok</span>
+                                <span class="tag hot">HOT</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-card" data-category="tiktok" onclick="selectTemplate(this, 'product-reveal')">
+                        <div class="template-preview-wrapper">
+                            <img class="template-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%236366f1' width='9' height='16'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='white' font-size='2'>✨%3C/text%3E%3C/svg%3E" alt="Product Reveal">
+                            <div class="template-overlay">
+                                <span class="play-icon">▶</span>
+                            </div>
+                        </div>
+                        <div class="template-info">
+                            <h3 class="template-name">Product Reveal</h3>
+                            <p class="template-desc">Dramatic product showcase</p>
+                            <div class="template-tags">
+                                <span class="tag">TikTok</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-card" data-category="tiktok" onclick="selectTemplate(this, 'before-after')">
+                        <div class="template-preview-wrapper">
+                            <img class="template-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%2310b981' width='9' height='16'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='white' font-size='2'>🔄%3C/text%3E%3C/svg%3E" alt="Before/After">
+                            <div class="template-overlay">
+                                <span class="play-icon">▶</span>
+                            </div>
+                        </div>
+                        <div class="template-info">
+                            <h3 class="template-name">Before & After</h3>
+                            <p class="template-desc">Show transformation results</p>
+                            <div class="template-tags">
+                                <span class="tag">TikTok</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-card" data-category="tiktok trending" onclick="selectTemplate(this, 'lifestyle')">
+                        <div class="template-preview-wrapper">
+                            <img class="template-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23fbbf24' width='9' height='16'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='white' font-size='2'>🌟%3C/text%3E%3C/svg%3E" alt="Lifestyle">
+                            <div class="template-overlay">
+                                <span class="play-icon">▶</span>
+                            </div>
+                        </div>
+                        <div class="template-info">
+                            <h3 class="template-name">Lifestyle</h3>
+                            <p class="template-desc">Daily life product integration</p>
+                            <div class="template-tags">
+                                <span class="tag">TikTok</span>
+                                <span class="tag trending">TRENDING</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-card" data-category="tiktok" onclick="selectTemplate(this, 'testimonial')">
+                        <div class="template-preview-wrapper">
+                            <img class="template-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23a855f7' width='9' height='16'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='white' font-size='2'>💬%3C/text%3E%3C/svg%3E" alt="Testimonial">
+                            <div class="template-overlay">
+                                <span class="play-icon">▶</span>
+                            </div>
+                        </div>
+                        <div class="template-info">
+                            <h3 class="template-name">Customer Testimonial</h3>
+                            <p class="template-desc">Social proof & reviews</p>
+                            <div class="template-tags">
+                                <span class="tag">TikTok</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-card" data-category="tiktok trending" onclick="selectTemplate(this, 'flash-sale')">
+                        <div class="template-preview-wrapper">
+                            <img class="template-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Crect fill='%23ef4444' width='9' height='16'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='white' font-size='2'>⚡%3C/text%3E%3C/svg%3E" alt="Flash Sale">
+                            <div class="template-overlay">
+                                <span class="play-icon">▶</span>
+                            </div>
+                        </div>
+                        <div class="template-info">
+                            <h3 class="template-name">Flash Sale</h3>
+                            <p class="template-desc">Urgency & special offers</p>
+                            <div class="template-tags">
+                                <span class="tag">TikTok</span>
+                                <span class="tag new">NEW</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 横版模板 -->
+                    <div class="template-card horizontal-template" data-category="youtube" onclick="selectTemplate(this, 'youtube-intro')">
+                        <div class="template-preview-wrapper">
+                            <img class="template-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect fill='%23dc2626' width='16' height='9'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='white' font-size='2'>▶️%3C/text%3E%3C/svg%3E" alt="YouTube Intro">
+                            <div class="template-overlay">
+                                <span class="play-icon">▶</span>
+                            </div>
+                        </div>
+                        <div class="template-info">
+                            <h3 class="template-name">YouTube Intro</h3>
+                            <p class="template-desc">Professional video opening</p>
+                            <div class="template-tags">
+                                <span class="tag">YouTube</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-card horizontal-template" data-category="youtube" onclick="selectTemplate(this, 'comparison')">
+                        <div class="template-preview-wrapper">
+                            <img class="template-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect fill='%230891b2' width='16' height='9'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='white' font-size='2'>⚖️%3C/text%3E%3C/svg%3E" alt="Comparison">
+                            <div class="template-overlay">
+                                <span class="play-icon">▶</span>
+                            </div>
+                        </div>
+                        <div class="template-info">
+                            <h3 class="template-name">Product Comparison</h3>
+                            <p class="template-desc">Side-by-side analysis</p>
+                            <div class="template-tags">
+                                <span class="tag">YouTube</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-card horizontal-template" data-category="youtube" onclick="selectTemplate(this, 'tutorial')">
+                        <div class="template-preview-wrapper">
+                            <img class="template-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect fill='%2316a34a' width='16' height='9'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='white' font-size='2'>📚%3C/text%3E%3C/svg%3E" alt="Tutorial">
+                            <div class="template-overlay">
+                                <span class="play-icon">▶</span>
+                            </div>
+                        </div>
+                        <div class="template-info">
+                            <h3 class="template-name">How-To Tutorial</h3>
+                            <p class="template-desc">Step-by-step guide</p>
+                            <div class="template-tags">
+                                <span class="tag">YouTube</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="template-card horizontal-template" data-category="youtube trending" onclick="selectTemplate(this, 'showcase')">
+                        <div class="template-preview-wrapper">
+                            <img class="template-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect fill='%237c3aed' width='16' height='9'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='white' font-size='2'>🎬%3C/text%3E%3C/svg%3E" alt="Showcase">
+                            <div class="template-overlay">
+                                <span class="play-icon">▶</span>
+                            </div>
+                        </div>
+                        <div class="template-info">
+                            <h3 class="template-name">Product Showcase</h3>
+                            <p class="template-desc">Cinematic presentation</p>
+                            <div class="template-tags">
+                                <span class="tag">YouTube</span>
+                                <span class="tag hot">HOT</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主要工作区 -->
+            <div class="workspace">
+                <!-- 左侧：产品上传 -->
+                <div class="workspace-left">
+                    <!-- 产品上传 -->
+                    <div class="upload-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <span class="section-title" style="margin: 0;">Replace A Product Image</span>
+                            <button class="reset-btn" onclick="resetUpload()">↻ Reset</button>
+                        </div>
+                        <p style="color: #64748b; font-size: 14px; margin-bottom: 15px;">Upload a JPG or PNG image, within 10MB each.</p>
+                        
+                        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                            <div id="uploadContent">
+                                <div class="upload-icon">📤</div>
+                                <div class="upload-title">Product</div>
+                                <div class="upload-subtitle">Click to upload or drag and drop</div>
+                                <button class="upload-btn">Choose Image</button>
+                            </div>
+                            <img id="uploadedImage" class="uploaded-image" style="display: none;">
+                            <input type="file" id="fileInput" style="display: none;" accept="image/jpeg,image/jpg,image/png" onchange="handleFileUpload(event)">
+                        </div>
+
+                        <div class="tip-box">
+                            <strong>Tip:</strong> Upload product images with a simple or transparent background. Try generating multiple times for the best results.
+                        </div>
+
+                        <!-- 示例产品 -->
+                        <div class="sample-products">
+                            <div class="sample-product" onclick="loadSampleProduct('cosmetic')">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23e0f2fe' width='100' height='100'/%3E%3Ctext x='50' y='55' text-anchor='middle' font-size='40'>🧴%3C/text%3E%3C/svg%3E" alt="Cosmetic">
+                            </div>
+                            <div class="sample-product" onclick="loadSampleProduct('perfume')">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23fce7f3' width='100' height='100'/%3E%3Ctext x='50' y='55' text-anchor='middle' font-size='40'>🍾%3C/text%3E%3C/svg%3E" alt="Perfume">
+                            </div>
+                            <div class="sample-product" onclick="loadSampleProduct('skincare')">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23dcfce7' width='100' height='100'/%3E%3Ctext x='50' y='55' text-anchor='middle' font-size='40'>🧪%3C/text%3E%3C/svg%3E" alt="Skincare">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧：运动文案和设置 -->
+                <div class="workspace-right">
+                    <!-- 运动文案 -->
+                    <div class="settings-container">
+                        <div class="section-title">Motion Description</div>
+                        <textarea class="motion-input" id="motionText" placeholder="A slow push-in shot, first, this red gift box appears...">A slow push-in shot, first, this red gift box appears with a gentle bounce animation, then sparkles surround it as the lid opens revealing the product inside...</textarea>
+                        <div class="motion-preset">
+                            <button class="preset-btn" onclick="setMotionPreset('dramatic')">Dramatic Reveal</button>
+                            <button class="preset-btn" onclick="setMotionPreset('smooth')">Smooth Transition</button>
+                            <button class="preset-btn" onclick="setMotionPreset('energetic')">Energetic Pop</button>
+                            <button class="preset-btn" onclick="setMotionPreset('elegant')">Elegant Flow</button>
+                        </div>
+                    </div>
+
+                    <!-- 生成按钮 -->
+                    <div class="actions-container">
+                        <button class="generate-btn" id="generateBtn" onclick="generateVideo()">
+                            <span>Generate</span>
+                            <span>🎬</span>
+                            <span class="credit-count">1</span>
+                        </button>
+                        <div class="process-info" id="processInfo" style="display: none;">
+                            <div class="process-status">
+                                <div class="status-icon">⏳</div>
+                                <div class="status-text">Generating your ad video...</div>
+                                <div class="status-percent" id="processPercent">0%</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 预览区域 -->
+            <div class="preview-section">
+                <div class="preview-header">
+                    <h2 class="preview-title">Video Preview</h2>
+                </div>
+                <div class="preview-container" id="previewContainer">
+                    <div class="preview-placeholder">
+                        <div class="preview-placeholder-icon">🎥</div>
+                        <p style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">No video generated yet</p>
+                        <p style="font-size: 14px;">Select a template, upload your product image, and click Generate to create your ad video</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 全局变量
+        let selectedTemplate = 'unboxing';
+        let hasProductImage = false;
+        let isGenerating = false;
+
+        // 筛选模板
+        function filterTemplates(category) {
+            // 更新标签激活状态
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 显示/隐藏模板
+            const templates = document.querySelectorAll('.template-card');
+            templates.forEach(template => {
+                if (category === 'all' || template.dataset.category.includes(category)) {
+                    template.style.display = 'block';
+                } else {
+                    template.style.display = 'none';
+                }
+            });
+        }
+
+        // 选择模板
+        function selectTemplate(element, templateName) {
+            document.querySelectorAll('.template-card').forEach(item => {
+                item.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedTemplate = templateName;
+            console.log('Selected template:', templateName);
+        }
+
+        // 文件上传处理
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('uploadContent').style.display = 'none';
+                    document.getElementById('uploadedImage').src = e.target.result;
+                    document.getElementById('uploadedImage').style.display = 'block';
+                    document.getElementById('uploadArea').classList.add('has-image');
+                    hasProductImage = true;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 加载示例产品
+        function loadSampleProduct(type) {
+            const sampleImages = {
+                cosmetic: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23e0f2fe" width="200" height="200"/%3E%3Ctext x="100" y="110" text-anchor="middle" font-size="80">🧴%3C/text%3E%3C/svg%3E',
+                perfume: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23fce7f3" width="200" height="200"/%3E%3Ctext x="100" y="110" text-anchor="middle" font-size="80">🍾%3C/text%3E%3C/svg%3E',
+                skincare: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23dcfce7" width="200" height="200"/%3E%3Ctext x="100" y="110" text-anchor="middle" font-size="80">🧪%3C/text%3E%3C/svg%3E'
+            };
+            
+            document.getElementById('uploadContent').style.display = 'none';
+            document.getElementById('uploadedImage').src = sampleImages[type];
+            document.getElementById('uploadedImage').style.display = 'block';
+            document.getElementById('uploadArea').classList.add('has-image');
+            hasProductImage = true;
+        }
+
+        // 重置上传
+        function resetUpload() {
+            document.getElementById('uploadContent').style.display = 'block';
+            document.getElementById('uploadedImage').style.display = 'none';
+            document.getElementById('uploadedImage').src = '';
+            document.getElementById('uploadArea').classList.remove('has-image');
+            document.getElementById('fileInput').value = '';
+            hasProductImage = false;
+        }
+
+        // 设置运动预设文案
+        function setMotionPreset(preset) {
+            const presets = {
+                dramatic: 'A dramatic slow zoom-in, the product emerges from darkness with spotlights, rotating 360 degrees to showcase every angle, finishing with a burst of light effects...',
+                smooth: 'Smooth camera movement gliding across the product, soft focus transitions, elegant text overlays appearing with gentle fade-ins...',
+                energetic: 'Fast-paced cuts, dynamic zooms, vibrant color pulses, product bouncing with energy, explosive particle effects surrounding the item...',
+                elegant: 'Graceful floating motion, soft lighting sweeps across the product, delicate particle effects, minimalist text animations with sophisticated timing...'
+            };
+            
+            document.getElementById('motionText').value = presets[preset] || '';
+        }
+
+        // 生成视频
+        function generateVideo() {
+            if (!hasProductImage) {
+                alert('Please upload a product image first!');
+                return;
+            }
+
+            if (isGenerating) {
+                return;
+            }
+
+            const generateBtn = document.getElementById('generateBtn');
+            const processInfo = document.getElementById('processInfo');
+            const progressFill = document.getElementById('progressFill');
+            const processPercent = document.getElementById('processPercent');
+
+            isGenerating = true;
+            generateBtn.disabled = true;
+            processInfo.style.display = 'block';
+
+            // 模拟生成进度
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    // 生成完成
+                    setTimeout(() => {
+                        processInfo.style.display = 'none';
+                        generateBtn.disabled = false;
+                        isGenerating = false;
+                        showGeneratedVideo();
+                    }, 500);
+                }
+                progressFill.style.width = progress + '%';
+                processPercent.textContent = Math.round(progress) + '%';
+            }, 300);
+        }
+
+        // 显示生成的视频
+        function showGeneratedVideo() {
+            const previewContainer = document.getElementById('previewContainer');
+            previewContainer.innerHTML = `
+                <video class="preview-video" controls autoplay loop>
+                    <source src="generated-video.mp4" type="video/mp4">
+                    <p>Your browser doesn't support video playback.</p>
+                </video>
+                <div style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px;">
+                    <button style="background: #10b981; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        ⬇ Download
+                    </button>
+                    <button style="background: #6366f1; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        🔄 Regenerate
+                    </button>
+                </div>
+            `;
+            
+            // 实际应用中，这里应该显示真实生成的视频
+            previewContainer.innerHTML = `
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 360px; height: 640px; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; text-align: center; padding: 20px;">
+                    <div>
+                        <div style="font-size: 64px; margin-bottom: 20px;">🎬</div>
+                        <div>Video Generated Successfully!</div>
+                        <div style="font-size: 16px; margin-top: 10px; opacity: 0.8;">Template: ${selectedTemplate}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 拖拽上传功能
+        const uploadArea = document.getElementById('uploadArea');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#6366f1';
+            uploadArea.style.background = '#f1f3ff';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#e2e8f0';
+            uploadArea.style.background = '#fafbfc';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#e2e8f0';
+            uploadArea.style.background = '#fafbfc';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const event = { target: { files: [files[0]] } };
+                handleFileUpload(event);
+            }
+        });
+
+        // 初始化默认选择第一个模板
+        window.onload = function() {
+            const firstTemplate = document.querySelector('.template-card');
+            if (firstTemplate) {
+                firstTemplate.classList.add('selected');
+            }
+        };
+    </script>
+</body>
+</html>
